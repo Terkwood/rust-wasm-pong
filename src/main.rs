@@ -110,7 +110,6 @@ lazy_static! {
 struct Cfg {}
 struct Menu {}
 struct Court {}
-struct Sounds {}
 
 struct Pong {
     cfg: Cfg,
@@ -120,12 +119,12 @@ struct Pong {
     images: Vec<String>,
     playing: bool,
     score: Score,
-    menu: Menu,
+    menu: Box<Menu>,
     court: Court,
     left_paddle: Paddle,
     right_paddle: Paddle,
     ball: Ball,
-    sounds: Sounds,
+    sounds: Box<Sounds>,
 }
 
 impl Pong {
@@ -191,6 +190,12 @@ impl Pong {
     fn goal(self, player: Player) {
         self.sounds.goal();
         self.score.incr(player);
+        if self.score.of(player) == 9 {
+            self.menu.declare_winner(player);
+            self.stop(false);
+        } else {
+            unimplemented!()
+        }
     }
 }
 
@@ -203,29 +208,29 @@ impl Score {
 
     pub fn of(self, player: Player) -> u32 {
         match player {
-            Player::Zero => self.0,
-            Player::One => self.1,
+            Player::One => self.0,
+            Player::Two => self.1,
         }
     }
 
     pub fn incr(mut self, player: Player) {
         match player {
-            Player::Zero => self.0 = self.0 + 1,
-            Player::One => self.1 = self.1 + 1,
+            Player::One => self.0 = self.0 + 1,
+            Player::Two => self.1 = self.1 + 1,
         }
     }
 }
 
 #[derive(Copy, Clone)]
 enum Player {
-    Zero,
     One,
+    Two,
 }
 impl Player {
     pub fn other(self) -> Player {
         match self {
-            Player::Zero => Player::One,
-            Player::One => Player::Zero,
+            Player::One => Player::Two,
+            Player::Two => Player::One,
         }
     }
 }
@@ -244,8 +249,15 @@ impl Ball {
     }
 }
 
+struct Sounds {}
 impl Sounds {
-    pub fn goal(self) {
+    pub fn goal(&self) {
+        unimplemented!()
+    }
+}
+
+impl Menu {
+    pub fn declare_winner(&self, player: Player) {
         unimplemented!()
     }
 }
