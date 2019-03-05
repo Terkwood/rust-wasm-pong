@@ -121,8 +121,8 @@ struct Pong {
     score: Score,
     menu: Box<Menu>,
     court: Court,
-    left_paddle: Paddle,
-    right_paddle: Paddle,
+    left_paddle: Box<Paddle>,
+    right_paddle: Box<Paddle>,
     ball: Ball,
     sounds: Box<Sounds>,
 }
@@ -167,7 +167,7 @@ impl Pong {
             self.left_paddle.set_auto(num_players < 1, unimplemented!());
             self.right_paddle
                 .set_auto(num_players < 2, unimplemented!());
-            self.ball.reset();
+            self.ball.reset(None);
             self.runner.hide_cursor();
         }
     }
@@ -181,12 +181,6 @@ impl Pong {
         }
     }
 
-    fn level(self, player: Player) -> u32 {
-        let x = self.score.of(player);
-        let y = self.score.of(player.other());
-        8 + (x - y)
-    }
-
     fn goal(self, player: Player) {
         self.sounds.goal();
         self.score.incr(player);
@@ -194,9 +188,17 @@ impl Pong {
             self.menu.declare_winner(player);
             self.stop(false);
         } else {
-            unimplemented!()
+            self.ball.reset(Some(player));
+            self.left_paddle.set_level(level(self.score, Player::One));
+            self.right_paddle.set_level(level(self.score, Player::Two));
         }
     }
+}
+
+fn level(score: Score, player: Player) -> u32 {
+    let x = score.of(player);
+    let y = score.of(player.other());
+    8 + (x - y)
 }
 
 #[derive(Copy, Clone)]
@@ -240,11 +242,16 @@ impl Paddle {
     pub fn set_auto(self, on: bool, level: Option<u32>) {
         unimplemented!()
     }
+
+    pub fn set_level(&self, level: u32) {
+        unimplemented!()
+    }
 }
 
+#[derive(Copy, Clone)]
 struct Ball {}
 impl Ball {
-    pub fn reset(self) {
+    pub fn reset(self, player: Option<Player>) {
         unimplemented!()
     }
 }
