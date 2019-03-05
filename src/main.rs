@@ -123,7 +123,7 @@ struct Pong {
     court: Court,
     left_paddle: Box<Paddle>,
     right_paddle: Box<Paddle>,
-    ball: Box<Ball>,
+    ball: Ball,
     sounds: Box<Sounds>,
 }
 
@@ -200,6 +200,8 @@ impl Pong {
         if (self.playing) {
             let dx = self.ball.dx;
             let dy = self.ball.dy;
+            self.ball.update(dt, &self.left_paddle, &self.right_paddle);
+            unimplemented!()
         }
     }
 }
@@ -256,7 +258,9 @@ impl Paddle {
         unimplemented!()
     }
 
-    pub fn update(self, dt: i32, ball: &Ball) {}
+    pub fn update(&self, dt: i32, ball: &Ball) {
+        unimplemented!()
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -265,9 +269,11 @@ struct Ball {
     dy: i32,
 }
 impl Ball {
-    pub fn reset(self, player: Option<Player>) {
+    pub fn reset(&self, player: Option<Player>) {
         unimplemented!()
     }
+
+    pub fn update(self, dt: i32, left: &Paddle, right: &Paddle) {}
 }
 
 struct Sounds {}
