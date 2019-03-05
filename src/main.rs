@@ -181,6 +181,33 @@ impl Pong {
             self.runner.show_cursor();
         }
     }
+
+    fn level(self, player: Player) -> u32 {
+        let x = player.score_for(self.scores);
+        let y = player.other().score_for(self.scores);
+        8 + (x - y)
+    }
+}
+
+#[derive(Copy, Clone)]
+enum Player {
+    Zero,
+    One,
+}
+impl Player {
+    pub fn score_for(self, score: (u32, u32)) -> u32 {
+        match self {
+            Player::Zero => score.0,
+            Player::One => score.1,
+        }
+    }
+
+    pub fn other(self) -> Player {
+        match self {
+            Player::Zero => Player::One,
+            Player::One => Player::Zero,
+        }
+    }
 }
 
 struct Paddle {}
