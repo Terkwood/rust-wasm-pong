@@ -123,7 +123,7 @@ struct Pong {
     court: Court,
     left_paddle: Box<Paddle>,
     right_paddle: Box<Paddle>,
-    ball: Ball,
+    ball: Box<Ball>,
     sounds: Box<Sounds>,
 }
 
@@ -193,6 +193,15 @@ impl Pong {
             self.right_paddle.set_level(level(self.score, Player::Two));
         }
     }
+
+    fn update(self, dt: i32) {
+        self.left_paddle.update(dt, &self.ball);
+        self.right_paddle.update(dt, &self.ball);
+        if (self.playing) {
+            let dx = self.ball.dx;
+            let dy = self.ball.dy;
+        }
+    }
 }
 
 fn level(score: Score, player: Player) -> u32 {
@@ -246,10 +255,15 @@ impl Paddle {
     pub fn set_level(&self, level: u32) {
         unimplemented!()
     }
+
+    pub fn update(self, dt: i32, ball: &Ball) {}
 }
 
 #[derive(Copy, Clone)]
-struct Ball {}
+struct Ball {
+    dx: i32,
+    dy: i32,
+}
 impl Ball {
     pub fn reset(self, player: Option<Player>) {
         unimplemented!()
