@@ -9,5 +9,58 @@
 
 <body>
     <script src="rust-wasm-pong.js"></script>
-    <div id="container"></div>
+
+
+    <div id="sidebar">
+
+        <h2>This is Rust 🦀 WASM 🕸 Pong 🏓!</h2>
+
+        <div class='description'>
+            <p>
+                This is straightforward port of
+                <a href="https://codeincomplete.com/games/pong/">javascript pong</a> to rustlang using
+                <a href="https://github.com/koute/stdweb">stdweb</a>.
+                Compiled to WebAssembly!
+            </p>
+            <p>
+                Press <b>1</b> for a single player game.<br>
+                Press <b>2</b> for a double player game.<br>
+                Press <b>0</b> to watch the computer play itself.
+            </p>
+            <p>
+                Player 1 moves using the <b>Q</b> and <b>A</b> keys.<br>
+                Player 2 moves using the <b>P</b> and <b>L</b> keys.
+            </p>
+            <p>
+                <b>Esc</b> can be used to abandon a game.
+            </p>
+        </div>
+
+        <div class='settings'>
+            <label for='sound'>sound: </label>
+            <input type='checkbox' id='sound'>
+        </div>
+
+        <div class='settings'>
+            <label for='stats'>stats: </label>
+            <input type='checkbox' id='stats'>
+        </div>
+
+        <div class='settings'>
+            <label for='footprints'>footprints: </label>
+            <input type='checkbox' id='footprints' checked>
+        </div>
+
+        <div class='settings'>
+            <label for='predictions'>predictions: </label>
+            <input type='checkbox' id='predictions'>
+        </div>
+
+    </div>
+
+    <canvas id="game">
+        <div id="unsupported">
+            Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
+        </div>
+    </canvas>
 </body>
