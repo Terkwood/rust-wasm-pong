@@ -9,4 +9,4 @@ stdweb = "0.4"
 
 [profile.release]
 lto = true
-opt-level = 's' # optimize for code size over speed
+opt-level = 's' # optimize for size
