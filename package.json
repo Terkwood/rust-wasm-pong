@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "deploy": "gh-pages -d static"
-   },  
+    "deploy": "sh build.sh && gh-pages -d static"
+  },
   "dependencies": {
     "gh-pages": "^2.0.1"
   }
