@@ -110,8 +110,6 @@ lazy_static! {
 struct Cfg {}
 struct Menu {}
 struct Court {}
-struct Paddle {}
-struct Ball {}
 struct Sounds {}
 
 struct Pong {
@@ -149,5 +147,49 @@ impl Pong {
             self.runner.start();
         };
         game::load_images(IMAGES.to_vec(), Box::new(cb))
+    }
+
+    fn start_demo(self) {
+        self.start(0)
+    }
+
+    fn start_single_player(self) {
+        self.start(1)
+    }
+
+    fn start_double_player(self) {
+        self.start(2)
+    }
+
+    fn start(mut self, num_players: u32) {
+        if (!self.playing) {
+            self.scores = (0, 0);
+            self.playing = true;
+            self.left_paddle.set_auto(num_players < 1, unimplemented!());
+            self.right_paddle
+                .set_auto(num_players < 2, unimplemented!());
+            self.ball.reset();
+            self.runner.hide_cursor();
+        }
+    }
+}
+
+struct Paddle {}
+impl Paddle {
+    pub fn set_auto(mut self, on: bool, level: u32) {
+        unimplemented!()
+    }
+}
+
+struct Ball {}
+impl Ball {
+    pub fn reset(self) {
+        unimplemented!()
+    }
+}
+
+impl Runner {
+    pub fn hide_cursor(self) {
+        unimplemented!()
     }
 }
