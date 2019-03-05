@@ -52,3 +52,16 @@ struct Colors {
     prediction_guess: String,
     prediction_exact: String,
 }
+
+impl Default for Colors {
+    fn default() -> Self {
+        Colors {
+            walls: "white".to_owned(),
+            ball: "white".to_owned(),
+            score: "white".to_owned(),
+            footprint: "#333".to_owned(),
+            prediction_guess: "yellow".to_owned(),
+            prediction_exact: "red".to_owned(),
+        }
+    }
+}
