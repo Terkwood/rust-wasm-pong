@@ -4,3 +4,8 @@ A straightforward port of [javascript pong](https://codeincomplete.com/games/pon
 
 Compiled to WebAssembly!
 
+## Running Locally
+
+```sh
+cargo web start
+```
