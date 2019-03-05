@@ -1,12 +1,11 @@
-#![feature(custom_attribute)]
+#[macro_use]
 extern crate stdweb;
-
-#[js_export]
-pub fn hello() -> String {
-    "Hello".to_string()
-}
 
 fn main() {
     stdweb::initialize();
+    let message = "PING 🏓 PONG 🏓";
+    js! {
+        alert( @{message} );
+    }
     stdweb::event_loop();
 }
