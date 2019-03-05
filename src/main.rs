@@ -218,9 +218,15 @@ impl Pong {
         }
     }
 
-    fn draw(self, ctx: CanvasRenderingContext2d) {
+    fn draw(self, ctx: &CanvasRenderingContext2d) {
         self.court.draw(ctx, self.score);
-        unimplemented!()
+        self.left_paddle.draw(ctx);
+        self.right_paddle.draw(ctx);
+        if self.playing {
+            self.ball.draw(ctx);
+        } else {
+            self.menu.draw(ctx);
+        }
     }
 }
 
@@ -273,6 +279,10 @@ impl Player {
 struct Menu {}
 
 impl Menu {
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
     pub fn declare_winner(&self, player: Player) {
         unimplemented!()
     }
@@ -307,7 +317,7 @@ impl Sounds {
 
 struct Court {}
 impl Court {
-    pub fn draw(self, ctx: CanvasRenderingContext2d, score: Score) {
+    pub fn draw(self, ctx: &CanvasRenderingContext2d, score: Score) {
         unimplemented!()
     }
 }
@@ -318,7 +328,11 @@ impl Court {
 
 struct Paddle {}
 impl Paddle {
-    pub fn set_auto(self, on: bool, level: Option<u32>) {
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn set_auto(&self, on: bool, level: Option<u32>) {
         unimplemented!()
     }
 
@@ -343,6 +357,10 @@ struct Ball {
     dy: i32,
 }
 impl Ball {
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
     pub fn reset(&self, player: Option<Player>) {
         unimplemented!()
     }
