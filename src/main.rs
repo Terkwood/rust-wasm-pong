@@ -204,11 +204,16 @@ impl Pong {
             if self.ball.dx < 0 && dx > 0 {
                 self.sounds.ping()
             } else if self.ball.dx > 0 && dx < 0 {
-                unimplemented!()
+                self.sounds.pong()
             } else if self.ball.dy * dy < 0 {
-                unimplemented!()
+                self.sounds.wall();
             };
-            unimplemented!()
+
+            if self.ball.left > self.width as i32 {
+                self.goal(Player::One)
+            } else if self.ball.right < 0 {
+                self.goal(Player::Two)
+            }
         }
     }
 }
@@ -272,6 +277,8 @@ impl Paddle {
 
 #[derive(Copy, Clone)]
 struct Ball {
+    left: i32,
+    right: i32,
     dx: i32,
     dy: i32,
 }
@@ -289,7 +296,17 @@ impl Sounds {
         unimplemented!()
     }
 
-    pub fn ping(&self) {}
+    pub fn ping(&self) {
+        unimplemented!()
+    }
+
+    pub fn pong(&self) {
+        unimplemented!()
+    }
+
+    pub fn wall(&self) {
+        unimplemented!()
+    }
 }
 
 impl Menu {
