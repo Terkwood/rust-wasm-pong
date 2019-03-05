@@ -5,6 +5,10 @@ extern crate stdweb;
 
 mod game;
 
+use stdweb::traits::*;
+use stdweb::unstable::TryInto;
+use stdweb::web::{document, window, CanvasRenderingContext2d};
+
 use game::Runner;
 
 fn main() {
@@ -108,9 +112,6 @@ lazy_static! {
 }
 
 struct Cfg {}
-struct Menu {}
-struct Court {}
-
 struct Pong {
     cfg: Cfg,
     runner: Runner,
@@ -216,6 +217,11 @@ impl Pong {
             }
         }
     }
+
+    fn draw(self, ctx: CanvasRenderingContext2d) {
+        self.court.draw(ctx, self.score);
+        unimplemented!()
+    }
 }
 
 fn level(score: Score, player: Player) -> u32 {
@@ -260,35 +266,21 @@ impl Player {
     }
 }
 
-struct Paddle {}
-impl Paddle {
-    pub fn set_auto(self, on: bool, level: Option<u32>) {
-        unimplemented!()
-    }
+//=============================================================================
+// MENU
+//=============================================================================
 
-    pub fn set_level(&self, level: u32) {
-        unimplemented!()
-    }
+struct Menu {}
 
-    pub fn update(&self, dt: i32, ball: &Ball) {
+impl Menu {
+    pub fn declare_winner(&self, player: Player) {
         unimplemented!()
     }
 }
 
-#[derive(Copy, Clone)]
-struct Ball {
-    left: i32,
-    right: i32,
-    dx: i32,
-    dy: i32,
-}
-impl Ball {
-    pub fn reset(&self, player: Option<Player>) {
-        unimplemented!()
-    }
-
-    pub fn update(self, dt: i32, left: &Paddle, right: &Paddle) {}
-}
+//=============================================================================
+// SOUNDS
+//=============================================================================
 
 struct Sounds {}
 impl Sounds {
@@ -309,8 +301,55 @@ impl Sounds {
     }
 }
 
-impl Menu {
-    pub fn declare_winner(&self, player: Player) {
+//=============================================================================
+// COURT
+//=============================================================================
+
+struct Court {}
+impl Court {
+    pub fn draw(self, ctx: CanvasRenderingContext2d, score: Score) {
         unimplemented!()
     }
 }
+
+//=============================================================================
+// PADDLE
+//=============================================================================
+
+struct Paddle {}
+impl Paddle {
+    pub fn set_auto(self, on: bool, level: Option<u32>) {
+        unimplemented!()
+    }
+
+    pub fn set_level(&self, level: u32) {
+        unimplemented!()
+    }
+
+    pub fn update(&self, dt: i32, ball: &Ball) {
+        unimplemented!()
+    }
+}
+
+//=============================================================================
+// BALL
+//=============================================================================
+
+#[derive(Copy, Clone)]
+struct Ball {
+    left: i32,
+    right: i32,
+    dx: i32,
+    dy: i32,
+}
+impl Ball {
+    pub fn reset(&self, player: Option<Player>) {
+        unimplemented!()
+    }
+
+    pub fn update(self, dt: i32, left: &Paddle, right: &Paddle) {}
+}
+
+//=============================================================================
+// HELPER
+//=============================================================================
