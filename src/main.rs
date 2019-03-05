@@ -1,4 +1,6 @@
 #[macro_use]
+extern crate lazy_static;
+#[macro_use]
 extern crate stdweb;
 
 fn main() {
@@ -64,4 +66,12 @@ impl Default for Colors {
             prediction_exact: "red".to_owned(),
         }
     }
+}
+
+lazy_static! {
+    pub static ref IMAGES: Vec<String> = vec![
+        "images/press1.png".to_owned(),
+        "images/press2.png".to_owned(),
+        "images/winner.png".to_owned(),
+    ];
 }
