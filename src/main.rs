@@ -5,6 +5,8 @@ extern crate stdweb;
 
 mod game;
 
+use game::Runner;
+
 fn main() {
     stdweb::initialize();
     let message = "PING 🏓 PONG 🏓";
@@ -106,7 +108,6 @@ lazy_static! {
 }
 
 struct Cfg {}
-struct Runner {}
 struct Menu {}
 struct Court {}
 struct Paddle {}
@@ -130,7 +131,23 @@ struct Pong {
 }
 
 impl Pong {
-    fn initialize(runner: Runner, cfg: Cfg) {
-        unimplemented!()
+    fn initialize(mut self, runner: Runner, cfg: Cfg) {
+        let cb = move |images| {
+            self.cfg = cfg;
+            self.runner = runner.clone();
+            self.width = runner.width;
+            self.height = runner.height;
+            self.images = images;
+            self.playing = false;
+            self.scores = (0, 0);
+            self.menu = unimplemented!();
+            self.court = unimplemented!();
+            self.left_paddle = unimplemented!();
+            self.right_paddle = unimplemented!();
+            self.ball = unimplemented!();
+            self.sounds = unimplemented!();
+            self.runner.start();
+        };
+        game::load_images(IMAGES.to_vec(), Box::new(cb))
     }
 }
