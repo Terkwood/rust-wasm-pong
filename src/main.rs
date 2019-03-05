@@ -119,7 +119,7 @@ struct Pong {
     height: u32,
     images: Vec<String>,
     playing: bool,
-    scores: (u32, u32),
+    score: Score,
     menu: Menu,
     court: Court,
     left_paddle: Paddle,
@@ -137,7 +137,7 @@ impl Pong {
             self.height = runner.height;
             self.images = images;
             self.playing = false;
-            self.scores = (0, 0);
+            self.score = Score::new();
             self.menu = unimplemented!();
             self.court = unimplemented!();
             self.left_paddle = unimplemented!();
@@ -163,7 +163,7 @@ impl Pong {
 
     fn start(mut self, num_players: u32) {
         if (!self.playing) {
-            self.scores = (0, 0);
+            self.score = Score::new();
             self.playing = true;
             self.left_paddle.set_auto(num_players < 1, unimplemented!());
             self.right_paddle
@@ -183,9 +183,36 @@ impl Pong {
     }
 
     fn level(self, player: Player) -> u32 {
-        let x = player.score_for(self.scores);
-        let y = player.other().score_for(self.scores);
+        let x = self.score.of(player);
+        let y = self.score.of(player.other());
         8 + (x - y)
+    }
+
+    fn goal(self, player: Player) {
+        self.sounds.goal();
+        self.score.incr(player);
+    }
+}
+
+#[derive(Copy, Clone)]
+struct Score(u32, u32);
+impl Score {
+    pub fn new() -> Score {
+        Score(0, 0)
+    }
+
+    pub fn of(self, player: Player) -> u32 {
+        match player {
+            Player::Zero => self.0,
+            Player::One => self.1,
+        }
+    }
+
+    pub fn incr(mut self, player: Player) {
+        match player {
+            Player::Zero => self.0 = self.0 + 1,
+            Player::One => self.1 = self.1 + 1,
+        }
     }
 }
 
@@ -195,13 +222,6 @@ enum Player {
     One,
 }
 impl Player {
-    pub fn score_for(self, score: (u32, u32)) -> u32 {
-        match self {
-            Player::Zero => score.0,
-            Player::One => score.1,
-        }
-    }
-
     pub fn other(self) -> Player {
         match self {
             Player::Zero => Player::One,
@@ -220,6 +240,12 @@ impl Paddle {
 struct Ball {}
 impl Ball {
     pub fn reset(self) {
+        unimplemented!()
+    }
+}
+
+impl Sounds {
+    pub fn goal(self) {
         unimplemented!()
     }
 }
