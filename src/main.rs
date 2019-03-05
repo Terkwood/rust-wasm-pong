@@ -196,15 +196,3 @@ impl Ball {
         unimplemented!()
     }
 }
-
-impl Runner {
-    pub fn confirm(self, _arg: &str) -> bool {
-        unimplemented!()
-    }
-    pub fn hide_cursor(self) {
-        unimplemented!()
-    }
-    pub fn show_cursor(self) {
-        unimplemented!()
-    }
-}
