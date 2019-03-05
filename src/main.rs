@@ -172,11 +172,20 @@ impl Pong {
             self.runner.hide_cursor();
         }
     }
+
+    fn stop(mut self, ask: bool) {
+        if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
+            self.playing = false;
+            self.left_paddle.set_auto(false, None);
+            self.right_paddle.set_auto(false, None);
+            self.runner.show_cursor();
+        }
+    }
 }
 
 struct Paddle {}
 impl Paddle {
-    pub fn set_auto(mut self, on: bool, level: u32) {
+    pub fn set_auto(self, on: bool, level: Option<u32>) {
         unimplemented!()
     }
 }
@@ -189,7 +198,13 @@ impl Ball {
 }
 
 impl Runner {
+    pub fn confirm(self, _arg: &str) -> bool {
+        unimplemented!()
+    }
     pub fn hide_cursor(self) {
+        unimplemented!()
+    }
+    pub fn show_cursor(self) {
         unimplemented!()
     }
 }
