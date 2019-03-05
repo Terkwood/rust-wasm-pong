@@ -110,8 +110,6 @@ lazy_static! {
 struct Cfg {}
 struct Menu {}
 struct Court {}
-struct Paddle {}
-struct Ball {}
 struct Sounds {}
 
 struct Pong {
@@ -149,5 +147,79 @@ impl Pong {
             self.runner.start();
         };
         game::load_images(IMAGES.to_vec(), Box::new(cb))
+    }
+
+    fn start_demo(self) {
+        self.start(0)
+    }
+
+    fn start_single_player(self) {
+        self.start(1)
+    }
+
+    fn start_double_player(self) {
+        self.start(2)
+    }
+
+    fn start(mut self, num_players: u32) {
+        if (!self.playing) {
+            self.scores = (0, 0);
+            self.playing = true;
+            self.left_paddle.set_auto(num_players < 1, unimplemented!());
+            self.right_paddle
+                .set_auto(num_players < 2, unimplemented!());
+            self.ball.reset();
+            self.runner.hide_cursor();
+        }
+    }
+
+    fn stop(mut self, ask: bool) {
+        if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
+            self.playing = false;
+            self.left_paddle.set_auto(false, None);
+            self.right_paddle.set_auto(false, None);
+            self.runner.show_cursor();
+        }
+    }
+
+    fn level(self, player: Player) -> u32 {
+        let x = player.score_for(self.scores);
+        let y = player.other().score_for(self.scores);
+        8 + (x - y)
+    }
+}
+
+#[derive(Copy, Clone)]
+enum Player {
+    Zero,
+    One,
+}
+impl Player {
+    pub fn score_for(self, score: (u32, u32)) -> u32 {
+        match self {
+            Player::Zero => score.0,
+            Player::One => score.1,
+        }
+    }
+
+    pub fn other(self) -> Player {
+        match self {
+            Player::Zero => Player::One,
+            Player::One => Player::Zero,
+        }
+    }
+}
+
+struct Paddle {}
+impl Paddle {
+    pub fn set_auto(self, on: bool, level: Option<u32>) {
+        unimplemented!()
+    }
+}
+
+struct Ball {}
+impl Ball {
+    pub fn reset(self) {
+        unimplemented!()
     }
 }
