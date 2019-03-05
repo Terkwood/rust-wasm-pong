@@ -111,7 +111,13 @@ lazy_static! {
     ];
 }
 
-struct Cfg {}
+struct Cfg {
+    stats: bool,
+    footprints: bool,
+    predictions: bool,
+    sound: bool,
+}
+
 struct Pong {
     cfg: Cfg,
     runner: Runner,
@@ -228,6 +234,27 @@ impl Pong {
             self.menu.draw(ctx);
         }
     }
+
+    fn onkeydown(key_code: u16) {
+        match key_code {
+            _ => unimplemented!(),
+        }
+    }
+
+    fn onkeyup(key_code: u16) {
+        match key_code {
+            _ => unimplemented!(),
+        }
+    }
+
+    fn show_stats(mut self, on: bool) {
+        self.cfg.stats = on;
+    }
+
+    fn show_footprints(mut self, on: bool) {
+        self.cfg.footprints = on;
+        self.ball.footprints = vec![];
+    }
 }
 
 fn level(score: Score, player: Player) -> u32 {
@@ -317,7 +344,7 @@ impl Sounds {
 
 struct Court {}
 impl Court {
-    pub fn draw(self, ctx: &CanvasRenderingContext2d, score: Score) {
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d, score: Score) {
         unimplemented!()
     }
 }
@@ -349,12 +376,12 @@ impl Paddle {
 // BALL
 //=============================================================================
 
-#[derive(Copy, Clone)]
 struct Ball {
     left: i32,
     right: i32,
     dx: i32,
     dy: i32,
+    footprints: Vec<bool>,
 }
 impl Ball {
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
@@ -365,7 +392,7 @@ impl Ball {
         unimplemented!()
     }
 
-    pub fn update(self, dt: i32, left: &Paddle, right: &Paddle) {}
+    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
 }
 
 //=============================================================================
