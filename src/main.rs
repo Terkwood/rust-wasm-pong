@@ -3,6 +3,8 @@ extern crate lazy_static;
 #[macro_use]
 extern crate stdweb;
 
+mod game;
+
 fn main() {
     stdweb::initialize();
     let message = "PING 🏓 PONG 🏓";
@@ -101,4 +103,34 @@ lazy_static! {
         Level{ai_reaction: 1.7, ai_error: 190}, // 15: ai is winning by 7
         Level{ai_reaction: 1.8, ai_error: 200}, // 16: ai is winning by 8
     ];
+}
+
+struct Cfg {}
+struct Runner {}
+struct Menu {}
+struct Court {}
+struct Paddle {}
+struct Ball {}
+struct Sounds {}
+
+struct Pong {
+    cfg: Cfg,
+    runner: Runner,
+    width: u32,
+    height: u32,
+    images: Vec<String>,
+    playing: bool,
+    scores: (u32, u32),
+    menu: Menu,
+    court: Court,
+    left_paddle: Paddle,
+    right_paddle: Paddle,
+    ball: Ball,
+    sounds: Sounds,
+}
+
+impl Pong {
+    fn initialize(runner: Runner, cfg: Cfg) {
+        unimplemented!()
+    }
 }
