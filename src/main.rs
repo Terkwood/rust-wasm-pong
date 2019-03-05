@@ -197,10 +197,17 @@ impl Pong {
     fn update(self, dt: i32) {
         self.left_paddle.update(dt, &self.ball);
         self.right_paddle.update(dt, &self.ball);
-        if (self.playing) {
+        if self.playing {
             let dx = self.ball.dx;
             let dy = self.ball.dy;
             self.ball.update(dt, &self.left_paddle, &self.right_paddle);
+            if self.ball.dx < 0 && dx > 0 {
+                self.sounds.ping()
+            } else if self.ball.dx > 0 && dx < 0 {
+                unimplemented!()
+            } else if self.ball.dy * dy < 0 {
+                unimplemented!()
+            };
             unimplemented!()
         }
     }
@@ -281,6 +288,8 @@ impl Sounds {
     pub fn goal(&self) {
         unimplemented!()
     }
+
+    pub fn ping(&self) {}
 }
 
 impl Menu {
