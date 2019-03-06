@@ -16,9 +16,11 @@ impl Game {
      * Renamed from `start` in the original version.
      * Removed the `game` and `cfg` args from the original version.
      */
-    pub fn new(id: u32) -> Self {
-        let r = Runner::new(id);
-        unimplemented!()
+    pub fn new(canvas_id: &str) -> Self {
+        let r = Runner::new(canvas_id);
+        Game {
+            runner: Box::new(r),
+        }
     }
 }
 
@@ -30,7 +32,7 @@ pub struct Runner {
     stats: Stats,
     fps: u16,
     interval: f32,
-    // TODO is this a dup of front?  Can we remove it?
+    // TODO  dup of front.  Can we remove it?
     canvas: CanvasElement,
     pub width: u32,
     pub height: u32,
@@ -45,12 +47,17 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn new(id: u32) -> Runner {
+    pub fn new(canvas_id: &str) -> Runner {
+        let fps = 60;
         let r = Runner {
             stats: Stats::new(),
-            fps: 60,
-            interval: unimplemented!(),
-            canvas: unimplemented!(),
+            fps: fps,
+            interval: 1000.0 / fps as f32,
+            canvas: document()
+                .get_element_by_id(canvas_id)
+                .unwrap()
+                .try_into()
+                .unwrap(),
             width: unimplemented!(),
             height: unimplemented!(),
             front: unimplemented!(),
