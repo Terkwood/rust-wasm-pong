@@ -15,7 +15,7 @@ pub fn load_images(sources: Vec<String>, cb: Box<(FnOnce(Vec<String>) -> ())>) {
         /* load multiple images and callback when ALL have finished loading */
         var images = {};
         var count = @{sources.len() as u32};
-        // TODO probably need Yew callback magic for this
+        // TODO may need Yew callback magic for this
         //var callback = @{cb};
         if (count == 0) {
             // TODO
