@@ -139,6 +139,12 @@ impl Pong {
     pub fn new(runner: Box<Runner>, cfg: Cfg) -> Pong {
         let w = runner.width as u32;
         let h = runner.height as u32;
+
+        // TODO we moved this ahead of the declaration
+        // of Pong, differing from the original implementation.
+        // It should be OK.  But please check.
+        runner.start();
+
         let pong = Pong {
             cfg: cfg,
             runner: Box::from(runner),
@@ -146,14 +152,14 @@ impl Pong {
             height: h,
             playing: false,
             score: Score::new(),
-            menu: unimplemented!(),
-            court: unimplemented!(),
-            left_paddle: unimplemented!(),
-            right_paddle: unimplemented!(),
-            ball: unimplemented!(),
-            sounds: unimplemented!(),
+            menu: Box::new(Menu::new()),
+            court: Court::new(),
+            left_paddle: Box::new(Paddle::new()),
+            right_paddle: Box::new(Paddle::new()),
+            ball: Ball::new(),
+            sounds: Box::new(Sounds::new()),
         };
-        runner.start();
+
         pong
     }
 
@@ -316,6 +322,10 @@ impl Player {
 struct Menu {}
 
 impl Menu {
+    pub fn new() -> Menu {
+        unimplemented!()
+    }
+
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
         unimplemented!()
     }
@@ -331,6 +341,10 @@ impl Menu {
 
 struct Sounds {}
 impl Sounds {
+    pub fn new() -> Sounds {
+        unimplemented!()
+    }
+
     pub fn goal(&self) {
         unimplemented!()
     }
@@ -354,6 +368,10 @@ impl Sounds {
 
 struct Court {}
 impl Court {
+    pub fn new() -> Court {
+        unimplemented!()
+    }
+
     pub fn draw(&self, ctx: &CanvasRenderingContext2d, score: Score) {
         unimplemented!()
     }
@@ -365,6 +383,10 @@ impl Court {
 
 struct Paddle {}
 impl Paddle {
+    pub fn new() -> Paddle {
+        unimplemented!()
+    }
+
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
         unimplemented!()
     }
@@ -394,6 +416,10 @@ struct Ball {
     footprints: Vec<bool>,
 }
 impl Ball {
+    pub fn new() -> Ball {
+        unimplemented!()
+    }
+
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
         unimplemented!()
     }
