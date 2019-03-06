@@ -125,7 +125,6 @@ struct Pong {
     runner: Box<Runner>,
     width: u32,
     height: u32,
-    images: Vec<String>,
     playing: bool,
     score: Score,
     menu: Box<Menu>,
@@ -137,26 +136,25 @@ struct Pong {
 }
 
 impl Pong {
-    fn initialize(mut self, runner: Box<Runner>, cfg: Cfg) {
-        let cb = move |images| {
-            let w = runner.width;
-            let h = runner.height;
-            self.cfg = cfg;
-            self.runner = Box::from(runner);
-            self.width = w as u32;
-            self.height = h as u32;
-            self.images = images;
-            self.playing = false;
-            self.score = Score::new();
-            self.menu = unimplemented!();
-            self.court = unimplemented!();
-            self.left_paddle = unimplemented!();
-            self.right_paddle = unimplemented!();
-            self.ball = unimplemented!();
-            self.sounds = unimplemented!();
-            self.runner.start();
+    pub fn new(runner: Box<Runner>, cfg: Cfg) -> Pong {
+        let w = runner.width as u32;
+        let h = runner.height as u32;
+        let pong = Pong {
+            cfg: cfg,
+            runner: Box::from(runner),
+            width: w,
+            height: h,
+            playing: false,
+            score: Score::new(),
+            menu: unimplemented!(),
+            court: unimplemented!(),
+            left_paddle: unimplemented!(),
+            right_paddle: unimplemented!(),
+            ball: unimplemented!(),
+            sounds: unimplemented!(),
         };
-        game::load_images(IMAGES.to_vec(), Box::new(cb))
+        runner.start();
+        pong
     }
 
     fn start_demo(self) {

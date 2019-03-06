@@ -10,6 +10,7 @@ pub fn add_document_event() -> stdweb::Value {
 }
 
 // TODO: type of cb data is wrong, should be like a js dict with {src:..., image:...}
+/*
 pub fn load_images(sources: Vec<String>, cb: Box<(FnOnce(Vec<String>) -> ())>) {
     js! {
         /* load multiple images and callback when ALL have finished loading */
@@ -35,7 +36,7 @@ pub fn load_images(sources: Vec<String>, cb: Box<(FnOnce(Vec<String>) -> ())>) {
 
         true
     }
-}
+}*/
 
 struct Game {
     runner: Box<Runner>,
