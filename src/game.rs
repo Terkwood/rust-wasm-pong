@@ -1,6 +1,6 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::event::KeyDownEvent;
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
@@ -79,7 +79,11 @@ impl Runner {
         });
 
         // TODO keyup event
-        unimplemented!();
+        window().add_event_listener(|event: KeyUpEvent| {
+            if unimplemented!() {
+                event.prevent_default()
+            }
+        });
 
         r
     }
