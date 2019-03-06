@@ -1,6 +1,7 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::html_element::{CanvasElement, ImageElement};
+use stdweb::web::event::KeyDownEvent;
+use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 struct Game {
@@ -70,7 +71,12 @@ impl Runner {
 
         // TODO keydown event
         // see https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
-        unimplemented!();
+        // see https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
+        window().add_event_listener(|event: KeyDownEvent| {
+            if unimplemented!() {
+                event.prevent_default()
+            }
+        });
 
         // TODO keyup event
         unimplemented!();
