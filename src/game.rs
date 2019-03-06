@@ -1,5 +1,6 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
+use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use crate::Cfg;
@@ -30,9 +31,18 @@ pub struct Runner {
     pub cfg: Cfg,
     pub fps: u16,
     pub interval: f32,
-    pub canvas: CanvasRenderingContext2d,
+    // TODO is this a dup of front?  Can we remove it?
+    pub canvas: CanvasElement,
     pub width: u32,
     pub height: u32,
+    front: CanvasElement,
+    front_width: u32,
+    front_height: u32,
+    back: CanvasElement,
+    back_width: u32,
+    back_height: u32,
+    front_2d: CanvasRenderingContext2d,
+    back_2d: CanvasRenderingContext2d,
 }
 
 impl Runner {
