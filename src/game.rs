@@ -3,41 +3,6 @@ use stdweb::unstable::TryInto;
 use stdweb::web::html_element::{CanvasElement, ImageElement};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
-pub fn add_document_event() -> stdweb::Value {
-    js! {
-        //var obj = @{}
-    }
-}
-
-// TODO: type of cb data is wrong, should be like a js dict with {src:..., image:...}
-/*
-pub fn load_images(sources: Vec<String>, cb: Box<(FnOnce(Vec<String>) -> ())>) {
-    js! {
-        /* load multiple images and callback when ALL have finished loading */
-        var images = {};
-        var count = @{sources.len() as u32};
-        // TODO may need Yew callback magic for this
-        //var callback = @{cb};
-        if (count == 0) {
-            // TODO
-            //callback (images);
-        } else {
-            for (var n = 0; n < sources.length; n++) {
-                var source = sources[n];
-                var image = document.createElement ("img");
-                images[source] = image;
-                Game.addEvent (image, "load", function () {
-                    // TODO
-                    //if (--count == 0) callback (images);
-                });
-                image.src = source;
-            }
-        }
-
-        true
-    }
-}*/
-
 struct Game {
     runner: Box<Runner>,
 }
@@ -66,12 +31,11 @@ pub struct Runner {
     stats: Stats,
     fps: u16,
     interval: f32,
-    // TODO  dup of front.  Can we remove it?
-    front_canvas: Box<CanvasElement>,
     pub width: i32,
     pub height: i32,
-    back_canvas: Box<CanvasElement>,
+    front_canvas: Box<CanvasElement>,
     front_canvas_2d: CanvasRenderingContext2d,
+    back_canvas: Box<CanvasElement>,
     back_canvas_2d: CanvasRenderingContext2d,
 }
 
@@ -104,7 +68,11 @@ impl Runner {
             back_canvas_2d: b2d,
         };
 
-        // TODO addEvents (keydown, keyup)
+        // TODO keydown event
+        // see https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
+        unimplemented!();
+
+        // TODO keyup event
         unimplemented!();
 
         r
