@@ -111,7 +111,7 @@ lazy_static! {
     ];
 }
 
-struct Cfg {
+pub struct Cfg {
     stats: bool,
     footprints: bool,
     predictions: bool,
@@ -120,7 +120,7 @@ struct Cfg {
 
 struct Pong {
     cfg: Cfg,
-    runner: Runner,
+    runner: Box<Runner>,
     width: u32,
     height: u32,
     images: Vec<String>,
@@ -135,12 +135,14 @@ struct Pong {
 }
 
 impl Pong {
-    fn initialize(mut self, runner: Runner, cfg: Cfg) {
+    fn initialize(mut self, runner: Box<Runner>, cfg: Cfg) {
         let cb = move |images| {
+            let w = runner.width;
+            let h = runner.height;
             self.cfg = cfg;
-            self.runner = runner.clone();
-            self.width = runner.width;
-            self.height = runner.height;
+            self.runner = Box::from(runner);
+            self.width = w;
+            self.height = h;
             self.images = images;
             self.playing = false;
             self.score = Score::new();
@@ -254,6 +256,14 @@ impl Pong {
     fn show_footprints(mut self, on: bool) {
         self.cfg.footprints = on;
         self.ball.footprints = vec![];
+    }
+
+    fn show_predictions(mut self, on: bool) {
+        self.cfg.predictions = on;
+    }
+
+    fn enable_sound(mut self, on: bool) {
+        self.cfg.sound = on;
     }
 }
 
