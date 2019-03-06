@@ -1,3 +1,5 @@
+#![recursion_limit = "128"]
+
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]

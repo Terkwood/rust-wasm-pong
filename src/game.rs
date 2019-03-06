@@ -1,7 +1,41 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::html_element::CanvasElement;
+use stdweb::web::html_element::{CanvasElement, ImageElement};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
+
+pub fn add_document_event() -> stdweb::Value {
+    js! {
+        //var obj = @{}
+    }
+}
+
+// TODO: type of cb data is wrong, should be like a js dict with {src:..., image:...}
+pub fn load_images(sources: Vec<String>, cb: Box<(FnOnce(Vec<String>) -> ())>) {
+    js! {
+        /* load multiple images and callback when ALL have finished loading */
+        var images = {};
+        var count = @{sources.len() as u32};
+        // TODO probably need Yew callback magic for this
+        //var callback = @{cb};
+        if (count == 0) {
+            // TODO
+            //callback (images);
+        } else {
+            for (var n = 0; n < sources.length; n++) {
+                var source = sources[n];
+                var image = document.createElement ("img");
+                images[source] = image;
+                Game.addEvent (image, "load", function () {
+                    // TODO
+                    //if (--count == 0) callback (images);
+                });
+                image.src = source;
+            }
+        }
+
+        true
+    }
+}
 
 struct Game {
     runner: Box<Runner>,
@@ -22,10 +56,6 @@ impl Game {
             runner: Box::new(r),
         }
     }
-}
-
-pub fn load_images(sources: Vec<String>, callback: Box<(FnOnce(Vec<String>) -> ())>) {
-    unimplemented!()
 }
 
 /**
