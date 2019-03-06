@@ -141,8 +141,8 @@ impl Pong {
             let h = runner.height;
             self.cfg = cfg;
             self.runner = Box::from(runner);
-            self.width = w;
-            self.height = h;
+            self.width = w as u32;
+            self.height = h as u32;
             self.images = images;
             self.playing = false;
             self.score = Score::new();

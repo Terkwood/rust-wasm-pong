@@ -28,20 +28,23 @@ pub fn load_images(sources: Vec<String>, callback: Box<(FnOnce(Vec<String>) -> (
     unimplemented!()
 }
 
+/**
+ * Tracks various information about the canvases used, stats on the game, etc.
+ */
 pub struct Runner {
     stats: Stats,
     fps: u16,
     interval: f32,
     // TODO  dup of front.  Can we remove it?
-    canvas: CanvasElement,
-    pub width: u32,
-    pub height: u32,
+    canvas: Box<CanvasElement>,
+    pub width: i32,
+    pub height: i32,
     front: CanvasElement,
-    front_width: u32,
-    front_height: u32,
+    front_width: i32,
+    front_height: i32,
     back: CanvasElement,
-    back_width: u32,
-    back_height: u32,
+    back_width: i32,
+    back_height: i32,
     front_2d: CanvasRenderingContext2d,
     back_2d: CanvasRenderingContext2d,
 }
@@ -49,17 +52,20 @@ pub struct Runner {
 impl Runner {
     pub fn new(canvas_id: &str) -> Runner {
         let fps = 60;
+        let canvas: CanvasElement = document()
+            .get_element_by_id(canvas_id)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        let canvas_width: i32 = canvas.offset_width();
+        let canvas_height: i32 = canvas.offset_height();
         let r = Runner {
             stats: Stats::new(),
             fps: fps,
             interval: 1000.0 / fps as f32,
-            canvas: document()
-                .get_element_by_id(canvas_id)
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            width: unimplemented!(),
-            height: unimplemented!(),
+            canvas: Box::new(canvas),
+            width: canvas_width,
+            height: canvas_height,
             front: unimplemented!(),
             front_width: unimplemented!(),
             front_height: unimplemented!(),
