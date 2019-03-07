@@ -55,7 +55,11 @@ impl Runner {
     /**
      * Create a new `Runner` and attach keyup/keydown events.
      *
-     * See:
+     * It's essential to use the `enclose!` macro to help clone
+     * Runner when it's called for keyup events. See
+     * https://github.com/koute/stdweb/blob/dff1e06086124fe79e3393a99ae8e2d424f5b2f1/examples/canvas/src/main.rs
+     *
+     * Also see these for info on handling key press:
      * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
      * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
      */
@@ -103,6 +107,11 @@ impl Runner {
      */
     fn on_key_down(&self, event: KeyDownEvent) {
         match event.code().as_ref() {
+            // TODO missing link to game object for, e.g.
+            // self.game.start_demo(),
+            "Digit0" => unimplemented!(),
+            "Digit1" => unimplemented!(),
+            "Digit2" => unimplemented!(),
             "KeyA" => unimplemented!(),
             &_ => unimplemented!(),
         };
