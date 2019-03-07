@@ -4,6 +4,16 @@ use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
+// Shamelessly stolen from webplatform's TodoMVC example.
+macro_rules! enclose {
+    ( ($( $x:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $y
+        }
+    };
+}
+
 struct Game {
     runner: Box<Runner>,
 }
@@ -28,6 +38,7 @@ impl Game {
 /**
  * Tracks various information about the canvases used, stats on the game, etc.
  */
+#[derive(Clone)]
 pub struct Runner {
     stats: Stats,
     fps: u16,
@@ -41,6 +52,13 @@ pub struct Runner {
 }
 
 impl Runner {
+    /**
+     * Create a new `Runner` and attach keyup/keydown events.
+     *
+     * See:
+     * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
+     * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
+     */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Runner {
         let fps = 60;
         let front_canvas: CanvasElement = document()
@@ -57,7 +75,7 @@ impl Runner {
             .unwrap();
         let f2d = front_canvas.get_context().unwrap();
         let b2d = back_canvas.get_context().unwrap();
-        let r = Runner {
+        let runner = Runner {
             stats: Stats::new(),
             fps: fps,
             interval: 1000.0 / fps as f32,
@@ -69,23 +87,33 @@ impl Runner {
             back_canvas_2d: b2d,
         };
 
-        // TODO keydown event
-        // see https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
-        // see https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
-        window().add_event_listener(|event: KeyDownEvent| {
-            if unimplemented!() {
-                event.prevent_default()
-            }
-        });
+        window().add_event_listener(enclose!((runner) move |event: KeyDownEvent|
+            runner.on_key_down(event)));
 
-        // TODO keyup event
-        window().add_event_listener(|event: KeyUpEvent| {
-            if unimplemented!() {
-                event.prevent_default()
-            }
-        });
+        window().add_event_listener(enclose!((runner) move |event: KeyUpEvent|
+            runner.on_key_up(event)));
 
-        r
+        runner
+    }
+
+    /**
+     * See
+     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code
+     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+     */
+    fn on_key_down(&self, event: KeyDownEvent) {
+        match event.code().as_ref() {
+            "KeyA" => unimplemented!(),
+            &_ => unimplemented!(),
+        };
+        event.prevent_default()
+    }
+
+    fn on_key_up(&self, event: KeyUpEvent) {
+        match event.code() {
+            _ => unimplemented!(),
+        };
+        event.prevent_default()
     }
 
     pub fn confirm(&self, _arg: &str) -> bool {
@@ -108,6 +136,7 @@ impl Runner {
 /**
  * @frame update + draw
  */
+#[derive(Clone)]
 struct Stats {
     count: u32,
     fps: u16,
