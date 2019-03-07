@@ -4,6 +4,8 @@ use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
+use crate::{Cfg, Pong};
+
 // Shamelessly stolen from webplatform's TodoMVC example.
 macro_rules! enclose {
     ( ($( $x:ident ),*) $y:expr ) => {
@@ -14,24 +16,76 @@ macro_rules! enclose {
     };
 }
 
+macro_rules! enclose_mut {
+    ( ($( $x:ident ),*) $y:expr ) => {
+        {
+            $(let mut $x = $x.clone();)*
+            $y
+        }
+    };
+}
+
+#[derive(Clone)]
 struct Game {
-    runner: Box<Runner>,
+    pong: Box<Pong>,
 }
 
 impl Game {
     /**
-     * Create a new instance of the game, exposing methods relating
-     * to canvas manipulation, HTML audio, receiving keyboard input,
-     * etc.
-     *
-     * Renamed from `start` in the original version.
-     * Removed the `game` and `cfg` args from the original version.
-     */
+    * Create a new instance of the game, exposing methods relating
+    * to canvas manipulation, HTML audio, receiving keyboard input,
+    * etc.
+    *
+    * Renamed from `start` in the original version.
+    * Removed the `game` and `cfg` args from the original version.
+    *
+    * It's essential to use the `enclose!` macro to help clone
+    * Game when it's called for keyup events. See
+    * https://github.com/koute/stdweb/blob/dff1e06086124fe79e3393a99ae8e2d424f5b2f1/examples/canvas/src/main.rs
+    *
+    * Also see these for info on handling key press:
+    * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
+    * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
+
+    */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Self {
-        let r = Runner::new(front_canvas_id, back_canvas_id);
-        Game {
-            runner: Box::new(r),
-        }
+        let runner = Box::new(Runner::new(front_canvas_id, back_canvas_id));
+        let pong = Pong::new(runner, Cfg::default());
+
+        let game = Game {
+            pong: Box::new(pong),
+        };
+
+        window().add_event_listener(enclose_mut!((game) move |event: KeyDownEvent|
+            game.on_key_down(event)));
+
+        window().add_event_listener(enclose_mut!((game) move |event: KeyUpEvent|
+            game.on_key_up(event)));
+
+        game
+    }
+
+    /**
+     * See
+     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code
+     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+     */
+    fn on_key_down(&mut self, event: KeyDownEvent) {
+        match event.code().as_ref() {
+            "Digit0" => self.pong.start_demo(),
+            "Digit1" => unimplemented!(),
+            "Digit2" => unimplemented!(),
+            "KeyA" => unimplemented!(),
+            &_ => unimplemented!(),
+        };
+        event.prevent_default()
+    }
+
+    fn on_key_up(&self, event: KeyUpEvent) {
+        match event.code() {
+            _ => unimplemented!(),
+        };
+        event.prevent_default()
     }
 }
 
@@ -52,17 +106,6 @@ pub struct Runner {
 }
 
 impl Runner {
-    /**
-     * Create a new `Runner` and attach keyup/keydown events.
-     *
-     * It's essential to use the `enclose!` macro to help clone
-     * Runner when it's called for keyup events. See
-     * https://github.com/koute/stdweb/blob/dff1e06086124fe79e3393a99ae8e2d424f5b2f1/examples/canvas/src/main.rs
-     *
-     * Also see these for info on handling key press:
-     * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
-     * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
-     */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Runner {
         let fps = 60;
         let front_canvas: CanvasElement = document()
@@ -91,38 +134,7 @@ impl Runner {
             back_canvas_2d: b2d,
         };
 
-        window().add_event_listener(enclose!((runner) move |event: KeyDownEvent|
-            runner.on_key_down(event)));
-
-        window().add_event_listener(enclose!((runner) move |event: KeyUpEvent|
-            runner.on_key_up(event)));
-
         runner
-    }
-
-    /**
-     * See
-     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code
-     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
-     */
-    fn on_key_down(&self, event: KeyDownEvent) {
-        match event.code().as_ref() {
-            // TODO missing link to game object for, e.g.
-            // self.game.start_demo(),
-            "Digit0" => unimplemented!(),
-            "Digit1" => unimplemented!(),
-            "Digit2" => unimplemented!(),
-            "KeyA" => unimplemented!(),
-            &_ => unimplemented!(),
-        };
-        event.prevent_default()
-    }
-
-    fn on_key_up(&self, event: KeyUpEvent) {
-        match event.code() {
-            _ => unimplemented!(),
-        };
-        event.prevent_default()
     }
 
     pub fn confirm(&self, _arg: &str) -> bool {

@@ -113,14 +113,26 @@ lazy_static! {
     ];
 }
 
+#[derive(Clone)]
 pub struct Cfg {
     stats: bool,
     footprints: bool,
     predictions: bool,
     sound: bool,
 }
+impl Default for Cfg {
+    fn default() -> Cfg {
+        Cfg {
+            stats: true,
+            footprints: false,
+            predictions: false,
+            sound: false,
+        }
+    }
+}
 
-struct Pong {
+#[derive(Clone)]
+pub struct Pong {
     cfg: Cfg,
     runner: Box<Runner>,
     width: u32,
@@ -163,19 +175,19 @@ impl Pong {
         pong
     }
 
-    fn start_demo(self) {
+    fn start_demo(&mut self) {
         self.start(0)
     }
 
-    fn start_single_player(self) {
+    fn start_single_player(&mut self) {
         self.start(1)
     }
 
-    fn start_double_player(self) {
+    fn start_double_player(&mut self) {
         self.start(2)
     }
 
-    fn start(mut self, num_players: u32) {
+    fn start(&mut self, num_players: u32) {
         if (!self.playing) {
             self.score = Score::new();
             self.playing = true;
@@ -319,6 +331,7 @@ impl Player {
 // MENU
 //=============================================================================
 
+#[derive(Clone)]
 struct Menu {}
 
 impl Menu {
@@ -339,6 +352,7 @@ impl Menu {
 // SOUNDS
 //=============================================================================
 
+#[derive(Clone)]
 struct Sounds {}
 impl Sounds {
     pub fn new() -> Sounds {
@@ -366,6 +380,7 @@ impl Sounds {
 // COURT
 //=============================================================================
 
+#[derive(Clone)]
 struct Court {}
 impl Court {
     pub fn new() -> Court {
@@ -381,6 +396,7 @@ impl Court {
 // PADDLE
 //=============================================================================
 
+#[derive(Clone)]
 struct Paddle {}
 impl Paddle {
     pub fn new() -> Paddle {
@@ -408,6 +424,7 @@ impl Paddle {
 // BALL
 //=============================================================================
 
+#[derive(Clone)]
 struct Ball {
     left: i32,
     right: i32,
