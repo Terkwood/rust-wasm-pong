@@ -1,8 +1,7 @@
 {
   "license": "MIT",
   "scripts": {
-    "build": "sh build.sh",
-    "deploy": "sh build.sh && gh-pages -d static"
+    "build": "sh build.sh"
   },
   "dependencies": {
     "gh-pages": "^2.0.1"
