@@ -1,9 +1,16 @@
+#![recursion_limit = "128"]
+
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate stdweb;
 
 mod game;
+
+use stdweb::traits::*;
+use stdweb::unstable::TryInto;
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
+use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use game::Runner;
 
@@ -107,73 +114,93 @@ lazy_static! {
     ];
 }
 
-struct Cfg {}
-struct Menu {}
-struct Court {}
-struct Sounds {}
+#[derive(Clone)]
+pub struct Cfg {
+    stats: bool,
+    footprints: bool,
+    predictions: bool,
+    sound: bool,
+}
+impl Default for Cfg {
+    fn default() -> Cfg {
+        Cfg {
+            stats: true,
+            footprints: false,
+            predictions: false,
+            sound: false,
+        }
+    }
+}
 
-struct Pong {
+#[derive(Clone)]
+pub struct Pong {
     cfg: Cfg,
-    runner: Runner,
+    runner: Box<Runner>,
     width: u32,
     height: u32,
-    images: Vec<String>,
     playing: bool,
-    scores: (u32, u32),
-    menu: Menu,
+    score: Score,
+    menu: Box<Menu>,
     court: Court,
-    left_paddle: Paddle,
-    right_paddle: Paddle,
+    left_paddle: Box<Paddle>,
+    right_paddle: Box<Paddle>,
     ball: Ball,
-    sounds: Sounds,
+    sounds: Box<Sounds>,
 }
 
 impl Pong {
-    fn initialize(mut self, runner: Runner, cfg: Cfg) {
-        let cb = move |images| {
-            self.cfg = cfg;
-            self.runner = runner.clone();
-            self.width = runner.width;
-            self.height = runner.height;
-            self.images = images;
-            self.playing = false;
-            self.scores = (0, 0);
-            self.menu = unimplemented!();
-            self.court = unimplemented!();
-            self.left_paddle = unimplemented!();
-            self.right_paddle = unimplemented!();
-            self.ball = unimplemented!();
-            self.sounds = unimplemented!();
-            self.runner.start();
+    pub fn new(runner: Box<Runner>, cfg: Cfg) -> Pong {
+        let w = runner.width as u32;
+        let h = runner.height as u32;
+
+        // TODO we moved this ahead of the declaration
+        // of Pong, differing from the original implementation.
+        // It should be OK.  But please check.
+        runner.start();
+
+        let pong = Pong {
+            cfg: cfg,
+            runner: Box::from(runner),
+            width: w,
+            height: h,
+            playing: false,
+            score: Score::new(),
+            menu: Box::new(Menu::new()),
+            court: Court::new(),
+            left_paddle: Box::new(Paddle::new()),
+            right_paddle: Box::new(Paddle::new()),
+            ball: Ball::new(),
+            sounds: Box::new(Sounds::new()),
         };
-        game::load_images(IMAGES.to_vec(), Box::new(cb))
+
+        pong
     }
 
-    fn start_demo(self) {
+    fn start_demo(&mut self) {
         self.start(0)
     }
 
-    fn start_single_player(self) {
+    fn start_single_player(&mut self) {
         self.start(1)
     }
 
-    fn start_double_player(self) {
+    fn start_double_player(&mut self) {
         self.start(2)
     }
 
-    fn start(mut self, num_players: u32) {
+    fn start(&mut self, num_players: u32) {
         if (!self.playing) {
-            self.scores = (0, 0);
+            self.score = Score::new();
             self.playing = true;
             self.left_paddle.set_auto(num_players < 1, unimplemented!());
             self.right_paddle
                 .set_auto(num_players < 2, unimplemented!());
-            self.ball.reset();
+            self.ball.reset(None);
             self.runner.hide_cursor();
         }
     }
 
-    fn stop(mut self, ask: bool) {
+    fn stop(&mut self, ask: bool) {
         if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
             self.playing = false;
             self.left_paddle.set_auto(false, None);
@@ -182,44 +209,261 @@ impl Pong {
         }
     }
 
-    fn level(self, player: Player) -> u32 {
-        let x = player.score_for(self.scores);
-        let y = player.other().score_for(self.scores);
-        8 + (x - y)
+    fn goal(&mut self, player: Player) {
+        self.sounds.goal();
+        self.score.incr(player);
+        if self.score.of(player) == 9 {
+            self.menu.declare_winner(player);
+            self.stop(false);
+        } else {
+            self.ball.reset(Some(player));
+            self.left_paddle.set_level(level(self.score, Player::One));
+            self.right_paddle.set_level(level(self.score, Player::Two));
+        }
+    }
+
+    fn update(&mut self, dt: i32) {
+        self.left_paddle.update(dt, &self.ball);
+        self.right_paddle.update(dt, &self.ball);
+        if self.playing {
+            let dx = self.ball.dx;
+            let dy = self.ball.dy;
+            self.ball.update(dt, &self.left_paddle, &self.right_paddle);
+            if self.ball.dx < 0 && dx > 0 {
+                self.sounds.ping()
+            } else if self.ball.dx > 0 && dx < 0 {
+                self.sounds.pong()
+            } else if self.ball.dy * dy < 0 {
+                self.sounds.wall();
+            };
+
+            if self.ball.left > self.width as i32 {
+                self.goal(Player::One)
+            } else if self.ball.right < 0 {
+                self.goal(Player::Two)
+            }
+        }
+    }
+
+    fn draw(self, ctx: &CanvasRenderingContext2d) {
+        self.court.draw(ctx, self.score);
+        self.left_paddle.draw(ctx);
+        self.right_paddle.draw(ctx);
+        if self.playing {
+            self.ball.draw(ctx);
+        } else {
+            self.menu.draw(ctx);
+        }
+    }
+
+    fn on_key_down(&mut self, event: KeyDownEvent) {
+        match event.code().as_ref() {
+            "Digit0" => self.start_demo(),
+            "Digit1" => self.start_single_player(),
+            "Digit2" => self.start_double_player(),
+            "Escape" => self.stop(true),
+            "KeyQ" => unimplemented!(),
+            &_ => unimplemented!(),
+        };
+        event.prevent_default()
+    }
+    fn on_key_up(key_code: u16) {
+        match key_code {
+            _ => unimplemented!(),
+        }
+    }
+
+    fn show_stats(mut self, on: bool) {
+        self.cfg.stats = on;
+    }
+
+    fn show_footprints(mut self, on: bool) {
+        self.cfg.footprints = on;
+        self.ball.footprints = vec![];
+    }
+
+    fn show_predictions(mut self, on: bool) {
+        self.cfg.predictions = on;
+    }
+
+    fn enable_sound(mut self, on: bool) {
+        self.cfg.sound = on;
+    }
+}
+
+fn level(score: Score, player: Player) -> u32 {
+    let x = score.of(player);
+    let y = score.of(player.other());
+    8 + (x - y)
+}
+
+#[derive(Copy, Clone)]
+struct Score(u32, u32);
+impl Score {
+    pub fn new() -> Score {
+        Score(0, 0)
+    }
+
+    pub fn of(self, player: Player) -> u32 {
+        match player {
+            Player::One => self.0,
+            Player::Two => self.1,
+        }
+    }
+
+    pub fn incr(mut self, player: Player) {
+        match player {
+            Player::One => self.0 = self.0 + 1,
+            Player::Two => self.1 = self.1 + 1,
+        }
     }
 }
 
 #[derive(Copy, Clone)]
 enum Player {
-    Zero,
     One,
+    Two,
 }
 impl Player {
-    pub fn score_for(self, score: (u32, u32)) -> u32 {
-        match self {
-            Player::Zero => score.0,
-            Player::One => score.1,
-        }
-    }
-
     pub fn other(self) -> Player {
         match self {
-            Player::Zero => Player::One,
-            Player::One => Player::Zero,
+            Player::One => Player::Two,
+            Player::Two => Player::One,
         }
     }
 }
 
-struct Paddle {}
-impl Paddle {
-    pub fn set_auto(self, on: bool, level: Option<u32>) {
+//=============================================================================
+// MENU
+//=============================================================================
+
+#[derive(Clone)]
+struct Menu {}
+
+impl Menu {
+    pub fn new() -> Menu {
+        unimplemented!()
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn declare_winner(&self, player: Player) {
         unimplemented!()
     }
 }
 
-struct Ball {}
-impl Ball {
-    pub fn reset(self) {
+//=============================================================================
+// SOUNDS
+//=============================================================================
+
+#[derive(Clone)]
+struct Sounds {}
+impl Sounds {
+    pub fn new() -> Sounds {
+        unimplemented!()
+    }
+
+    pub fn goal(&self) {
+        unimplemented!()
+    }
+
+    pub fn ping(&self) {
+        unimplemented!()
+    }
+
+    pub fn pong(&self) {
+        unimplemented!()
+    }
+
+    pub fn wall(&self) {
         unimplemented!()
     }
 }
+
+//=============================================================================
+// COURT
+//=============================================================================
+
+#[derive(Clone)]
+struct Court {}
+impl Court {
+    pub fn new() -> Court {
+        unimplemented!()
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d, score: Score) {
+        unimplemented!()
+    }
+}
+
+//=============================================================================
+// PADDLE
+//=============================================================================
+
+#[derive(Clone)]
+struct Paddle {
+    auto: bool,
+}
+impl Paddle {
+    pub fn new() -> Paddle {
+        unimplemented!()
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn move_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn move_up(&self) {
+        unimplemented!()
+    }
+
+    pub fn set_auto(&self, on: bool, level: Option<u32>) {
+        unimplemented!()
+    }
+
+    pub fn set_level(&self, level: u32) {
+        unimplemented!()
+    }
+
+    pub fn update(&self, dt: i32, ball: &Ball) {
+        unimplemented!()
+    }
+}
+
+//=============================================================================
+// BALL
+//=============================================================================
+
+#[derive(Clone)]
+struct Ball {
+    left: i32,
+    right: i32,
+    dx: i32,
+    dy: i32,
+    footprints: Vec<bool>,
+}
+impl Ball {
+    pub fn new() -> Ball {
+        unimplemented!()
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn reset(&self, player: Option<Player>) {
+        unimplemented!()
+    }
+
+    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
+}
+
+//=============================================================================
+// HELPER
+//=============================================================================
