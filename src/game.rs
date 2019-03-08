@@ -93,7 +93,27 @@ impl Game {
     }
 
     fn on_key_up(&self, event: KeyUpEvent) {
-        match event.code() {
+        match event.code().as_ref() {
+            "KeyQ" | "KeyW" => {
+                if !self.pong.left_paddle.auto {
+                    self.pong.left_paddle.stop_moving_up()
+                }
+            }
+            "KeyA" | "KeyS" => {
+                if !self.pong.left_paddle.auto {
+                    self.pong.left_paddle.stop_moving_down()
+                }
+            }
+            "KeyP" | "ArrowUp" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.stop_moving_up()
+                }
+            }
+            "KeyL" | "ArrowDown" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.stop_moving_down()
+                }
+            }
             _ => unimplemented!(),
         };
         event.prevent_default()

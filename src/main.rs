@@ -431,6 +431,14 @@ impl Paddle {
         unimplemented!()
     }
 
+    pub fn stop_moving_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn stop_moving_up(&self) {
+        unimplemented!()
+    }
+
     pub fn update(&self, dt: i32, ball: &Ball) {
         unimplemented!()
     }
