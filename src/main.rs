@@ -9,6 +9,7 @@ mod game;
 
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use game::Runner;
@@ -199,7 +200,7 @@ impl Pong {
         }
     }
 
-    fn stop(mut self, ask: bool) {
+    fn stop(&mut self, ask: bool) {
         if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
             self.playing = false;
             self.left_paddle.set_auto(false, None);
@@ -208,7 +209,7 @@ impl Pong {
         }
     }
 
-    fn goal(self, player: Player) {
+    fn goal(&mut self, player: Player) {
         self.sounds.goal();
         self.score.incr(player);
         if self.score.of(player) == 9 {
@@ -221,7 +222,7 @@ impl Pong {
         }
     }
 
-    fn update(self, dt: i32) {
+    fn update(&mut self, dt: i32) {
         self.left_paddle.update(dt, &self.ball);
         self.right_paddle.update(dt, &self.ball);
         if self.playing {
@@ -255,13 +256,18 @@ impl Pong {
         }
     }
 
-    fn onkeydown(key_code: u16) {
-        match key_code {
-            _ => unimplemented!(),
-        }
+    fn on_key_down(&mut self, event: KeyDownEvent) {
+        match event.code().as_ref() {
+            "Digit0" => self.start_demo(),
+            "Digit1" => self.start_single_player(),
+            "Digit2" => self.start_double_player(),
+            "Escape" => self.stop(true),
+            "KeyQ" => unimplemented!(),
+            &_ => unimplemented!(),
+        };
+        event.prevent_default()
     }
-
-    fn onkeyup(key_code: u16) {
+    fn on_key_up(key_code: u16) {
         match key_code {
             _ => unimplemented!(),
         }

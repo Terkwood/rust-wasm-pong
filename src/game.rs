@@ -6,16 +6,7 @@ use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use crate::{Cfg, Pong};
 
-// Shamelessly stolen from webplatform's TodoMVC example.
-macro_rules! enclose {
-    ( ($( $x:ident ),*) $y:expr ) => {
-        {
-            $(let $x = $x.clone();)*
-            $y
-        }
-    };
-}
-
+// From webplatform's TodoMVC example.
 macro_rules! enclose_mut {
     ( ($( $x:ident ),*) $y:expr ) => {
         {
