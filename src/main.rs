@@ -16,7 +16,7 @@ use game::{Game, Runner};
 
 fn main() {
     stdweb::initialize();
-    Game::new("#game", "#back");
+    Game::new("game", "back");
     stdweb::event_loop();
 }
 

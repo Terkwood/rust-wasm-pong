@@ -83,8 +83,8 @@ impl Game {
 
     */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Self {
-        js! {console.log("PING PONG");}
         let runner = Box::new(Runner::new(front_canvas_id, back_canvas_id));
+
         let pong = Pong::new(runner, Cfg::default());
 
         let game = Game {
@@ -225,6 +225,7 @@ impl Runner {
     }
 
     pub fn start(&self) {
+        js! {console.log("PING 🏓 PONG 🏓");}
         unimplemented!()
     }
 }
