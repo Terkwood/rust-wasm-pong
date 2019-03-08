@@ -4,6 +4,7 @@ use stdweb::web::event::{KeyDownEvent, KeyUpEvent, ReadyStateChangeEvent};
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{
     document, window, CanvasRenderingContext2d, MutationObserver, MutationObserverHandle,
+    MutationObserverInit,
 };
 
 use crate::{Cfg, Pong};
@@ -37,11 +38,32 @@ impl Game {
      *
      * [See stdweb docs](https://docs.rs/stdweb/0.4.0/stdweb/web/struct.MutationObserver.html)
      */
-    pub fn ready() {
-        window().add_event_listener(move |event: KeyDownEvent| {
-            js! {console.log("PING 🏓 PONG 🏓")};
+    /*pub fn ready() -> MutationObserverHandle {
+        let mo = MutationObserver::new(|_changes, _self| {
+            js! {console.log("Mutating")}
         });
-    }
+
+        /*let is_doc_ready: bool = js! {document.readyState === "complete"}.try_into().unwrap_or(false);
+        if is_doc_ready {
+            js! {console.log("READY!")}
+        };*/
+
+        mo.observe(
+            &document().query_selector("#sidebar").unwrap().unwrap(),
+            MutationObserverInit {
+                attributes: true,
+                child_list: true,
+                subtree: true,
+                attribute_filter: None,
+                attribute_old_value: true,
+                character_data: true,
+                character_data_old_value: true,
+            },
+        )
+        .unwrap();
+
+        mo
+    }*/
 
     /**
     * Create a new instance of the game, exposing methods relating
@@ -61,6 +83,7 @@ impl Game {
 
     */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Self {
+        js! {console.log("PING PONG");}
         let runner = Box::new(Runner::new(front_canvas_id, back_canvas_id));
         let pong = Pong::new(runner, Cfg::default());
 
