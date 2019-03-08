@@ -64,9 +64,14 @@ impl Game {
     fn on_key_down(&mut self, event: KeyDownEvent) {
         match event.code().as_ref() {
             "Digit0" => self.pong.start_demo(),
-            "Digit1" => unimplemented!(),
-            "Digit2" => unimplemented!(),
-            "KeyA" => unimplemented!(),
+            "Digit1" => self.pong.start_single_player(),
+            "Digit2" => self.pong.start_double_player(),
+            "Escape" => self.pong.stop(true),
+            "KeyQ" => {
+                if self.pong.left_paddle.auto {
+                    self.pong.left_paddle.move_up()
+                }
+            }
             &_ => unimplemented!(),
         };
         event.prevent_default()

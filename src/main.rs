@@ -403,13 +403,23 @@ impl Court {
 //=============================================================================
 
 #[derive(Clone)]
-struct Paddle {}
+struct Paddle {
+    auto: bool,
+}
 impl Paddle {
     pub fn new() -> Paddle {
         unimplemented!()
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn move_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn move_up(&self) {
         unimplemented!()
     }
 
