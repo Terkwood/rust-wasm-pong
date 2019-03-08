@@ -67,12 +67,27 @@ impl Game {
             "Digit1" => self.pong.start_single_player(),
             "Digit2" => self.pong.start_double_player(),
             "Escape" => self.pong.stop(true),
-            "KeyQ" => {
-                if self.pong.left_paddle.auto {
+            "KeyQ" | "KeyW" => {
+                if !self.pong.left_paddle.auto {
                     self.pong.left_paddle.move_up()
                 }
             }
-            &_ => unimplemented!(),
+            "KeyA" | "KeyS" => {
+                if !self.pong.left_paddle.auto {
+                    self.pong.left_paddle.move_down()
+                }
+            }
+            "KeyP" | "ArrowUp" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.move_up()
+                }
+            }
+            "KeyL" | "ArrowDown" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.move_down()
+                }
+            }
+            &_ => (),
         };
         event.prevent_default()
     }
