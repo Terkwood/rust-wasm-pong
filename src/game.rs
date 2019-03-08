@@ -1,12 +1,22 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent, ReadyStateChangeEvent};
 use stdweb::web::html_element::CanvasElement;
-use stdweb::web::{document, window, CanvasRenderingContext2d};
+use stdweb::web::{
+    document, window, CanvasRenderingContext2d, MutationObserver, MutationObserverHandle,
+};
 
 use crate::{Cfg, Pong};
 
 // From webplatform's TodoMVC example.
+macro_rules! enclose {
+    ( ($( $x:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $y
+        }
+    };
+}
 macro_rules! enclose_mut {
     ( ($( $x:ident ),*) $y:expr ) => {
         {
@@ -17,11 +27,22 @@ macro_rules! enclose_mut {
 }
 
 #[derive(Clone)]
-struct Game {
+pub struct Game {
     pong: Box<Pong>,
 }
 
 impl Game {
+    /**
+     * Execute this code when the DOM content is loaded.
+     *
+     * [See stdweb docs](https://docs.rs/stdweb/0.4.0/stdweb/web/struct.MutationObserver.html)
+     */
+    pub fn ready() {
+        window().add_event_listener(move |event: KeyDownEvent| {
+            js! {console.log("PING 🏓 PONG 🏓")};
+        });
+    }
+
     /**
     * Create a new instance of the game, exposing methods relating
     * to canvas manipulation, HTML audio, receiving keyboard input,
@@ -114,7 +135,7 @@ impl Game {
                     self.pong.right_paddle.stop_moving_down()
                 }
             }
-            _ => unimplemented!(),
+            _ => (),
         };
         event.prevent_default()
     }

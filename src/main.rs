@@ -12,14 +12,11 @@ use stdweb::unstable::TryInto;
 use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
-use game::Runner;
+use game::{Game, Runner};
 
 fn main() {
     stdweb::initialize();
-    let message = "PING 🏓 PONG 🏓";
-    js! {
-        alert( @{message} );
-    }
+    Game::ready();
     stdweb::event_loop();
 }
 
