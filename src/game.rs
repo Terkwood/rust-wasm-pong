@@ -1,23 +1,14 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::event::{KeyDownEvent, KeyUpEvent, ReadyStateChangeEvent};
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::html_element::CanvasElement;
-use stdweb::web::{
-    document, window, CanvasRenderingContext2d, MutationObserver, MutationObserverHandle,
-    MutationObserverInit,
-};
+use stdweb::web::set_timeout;
+use stdweb::web::{document, window, CanvasRenderingContext2d};
 
-use crate::{Cfg, Pong};
+use crate::{log_wip, Cfg, Pong};
 
 // From webplatform's TodoMVC example.
-macro_rules! enclose {
-    ( ($( $x:ident ),*) $y:expr ) => {
-        {
-            $(let $x = $x.clone();)*
-            $y
-        }
-    };
-}
+#[macro_export]
 macro_rules! enclose_mut {
     ( ($( $x:ident ),*) $y:expr ) => {
         {
@@ -29,42 +20,10 @@ macro_rules! enclose_mut {
 
 #[derive(Clone)]
 pub struct Game {
-    pong: Box<Pong>,
+    pub pong: Box<Pong>,
 }
 
 impl Game {
-    /**
-     * Execute this code when the DOM content is loaded.
-     *
-     * [See stdweb docs](https://docs.rs/stdweb/0.4.0/stdweb/web/struct.MutationObserver.html)
-     */
-    /*pub fn ready() -> MutationObserverHandle {
-        let mo = MutationObserver::new(|_changes, _self| {
-            js! {console.log("Mutating")}
-        });
-
-        /*let is_doc_ready: bool = js! {document.readyState === "complete"}.try_into().unwrap_or(false);
-        if is_doc_ready {
-            js! {console.log("READY!")}
-        };*/
-
-        mo.observe(
-            &document().query_selector("#sidebar").unwrap().unwrap(),
-            MutationObserverInit {
-                attributes: true,
-                child_list: true,
-                subtree: true,
-                attribute_filter: None,
-                attribute_old_value: true,
-                character_data: true,
-                character_data_old_value: true,
-            },
-        )
-        .unwrap();
-
-        mo
-    }*/
-
     /**
     * Create a new instance of the game, exposing methods relating
     * to canvas manipulation, HTML audio, receiving keyboard input,
@@ -172,6 +131,7 @@ pub struct Runner {
     stats: Stats,
     fps: u16,
     interval: f32,
+    stopped: bool,
     pub width: i32,
     pub height: i32,
     front_canvas: Box<CanvasElement>,
@@ -201,6 +161,7 @@ impl Runner {
             stats: Stats::new(),
             fps: fps,
             interval: 1000.0 / fps as f32,
+            stopped: false,
             front_canvas: Box::new(front_canvas),
             width: canvas_width,
             height: canvas_height,
@@ -224,9 +185,20 @@ impl Runner {
         unimplemented!()
     }
 
-    pub fn start(&self) {
-        js! {console.log("PING 🏓 PONG 🏓");}
-        unimplemented!()
+    /**
+     * game instance should call runner.start() when its finished initializing
+     * and is ready to start the game loop.
+     */
+    pub fn start(&'static self) {
+        self.game_loop()
+        // TODO self.last_frame = unimplemented!();
+        // TODO self.timer = unimplemented!();
+    }
+
+    fn game_loop(&'static self) {
+        log_wip();
+        set_timeout(move || self.game_loop(), self.interval as u32);
+        // TODO allow clear via stopped var
     }
 }
 

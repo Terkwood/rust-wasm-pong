@@ -9,15 +9,22 @@ mod game;
 
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use game::{Game, Runner};
 
 fn main() {
     stdweb::initialize();
-    Game::new("game", "back");
+    GAME.pong.runner.start();
     stdweb::event_loop();
+}
+
+pub fn log_wip() {
+    js! {console.log("PING 🏓 PONG 🏓");}
+}
+
+lazy_static! {
+    pub static ref GAME: Game = Game::new("game", "back");
 }
 
 //=============================================================================
@@ -150,14 +157,9 @@ impl Pong {
         let w = runner.width as u32;
         let h = runner.height as u32;
 
-        // TODO we moved this ahead of the declaration
-        // of Pong, differing from the original implementation.
-        // It should be OK.  But please check.
-        runner.start();
-
         let pong = Pong {
             cfg: cfg,
-            runner: Box::from(runner),
+            runner: runner,
             width: w,
             height: h,
             playing: false,
@@ -253,23 +255,6 @@ impl Pong {
         }
     }
 
-    fn on_key_down(&mut self, event: KeyDownEvent) {
-        match event.code().as_ref() {
-            "Digit0" => self.start_demo(),
-            "Digit1" => self.start_single_player(),
-            "Digit2" => self.start_double_player(),
-            "Escape" => self.stop(true),
-            "KeyQ" => unimplemented!(),
-            &_ => unimplemented!(),
-        };
-        event.prevent_default()
-    }
-    fn on_key_up(key_code: u16) {
-        match key_code {
-            _ => unimplemented!(),
-        }
-    }
-
     fn show_stats(mut self, on: bool) {
         self.cfg.stats = on;
     }
@@ -339,7 +324,8 @@ struct Menu {}
 
 impl Menu {
     pub fn new() -> Menu {
-        unimplemented!()
+        //TODO punted
+        Menu {}
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
@@ -359,7 +345,8 @@ impl Menu {
 struct Sounds {}
 impl Sounds {
     pub fn new() -> Sounds {
-        unimplemented!()
+        // TODO punted
+        Sounds {}
     }
 
     pub fn goal(&self) {
@@ -387,7 +374,8 @@ impl Sounds {
 struct Court {}
 impl Court {
     pub fn new() -> Court {
-        unimplemented!()
+        //TODO punted
+        Court {}
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d, score: Score) {
@@ -405,7 +393,8 @@ struct Paddle {
 }
 impl Paddle {
     pub fn new() -> Paddle {
-        unimplemented!()
+        //TODO
+        Paddle { auto: true }
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
@@ -455,7 +444,14 @@ struct Ball {
 }
 impl Ball {
     pub fn new() -> Ball {
-        unimplemented!()
+        // TODO punted
+        Ball {
+            left: 0,
+            right: 0,
+            dx: 0,
+            dy: 0,
+            footprints: vec![],
+        }
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
