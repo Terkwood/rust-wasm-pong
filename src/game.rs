@@ -1,12 +1,23 @@
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
+use stdweb::web::event::{KeyDownEvent, KeyUpEvent, ReadyStateChangeEvent};
 use stdweb::web::html_element::CanvasElement;
-use stdweb::web::{document, window, CanvasRenderingContext2d};
+use stdweb::web::{
+    document, window, CanvasRenderingContext2d, MutationObserver, MutationObserverHandle,
+    MutationObserverInit,
+};
 
 use crate::{Cfg, Pong};
 
 // From webplatform's TodoMVC example.
+macro_rules! enclose {
+    ( ($( $x:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $y
+        }
+    };
+}
 macro_rules! enclose_mut {
     ( ($( $x:ident ),*) $y:expr ) => {
         {
@@ -17,11 +28,43 @@ macro_rules! enclose_mut {
 }
 
 #[derive(Clone)]
-struct Game {
+pub struct Game {
     pong: Box<Pong>,
 }
 
 impl Game {
+    /**
+     * Execute this code when the DOM content is loaded.
+     *
+     * [See stdweb docs](https://docs.rs/stdweb/0.4.0/stdweb/web/struct.MutationObserver.html)
+     */
+    /*pub fn ready() -> MutationObserverHandle {
+        let mo = MutationObserver::new(|_changes, _self| {
+            js! {console.log("Mutating")}
+        });
+
+        /*let is_doc_ready: bool = js! {document.readyState === "complete"}.try_into().unwrap_or(false);
+        if is_doc_ready {
+            js! {console.log("READY!")}
+        };*/
+
+        mo.observe(
+            &document().query_selector("#sidebar").unwrap().unwrap(),
+            MutationObserverInit {
+                attributes: true,
+                child_list: true,
+                subtree: true,
+                attribute_filter: None,
+                attribute_old_value: true,
+                character_data: true,
+                character_data_old_value: true,
+            },
+        )
+        .unwrap();
+
+        mo
+    }*/
+
     /**
     * Create a new instance of the game, exposing methods relating
     * to canvas manipulation, HTML audio, receiving keyboard input,
@@ -41,6 +84,7 @@ impl Game {
     */
     pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Self {
         let runner = Box::new(Runner::new(front_canvas_id, back_canvas_id));
+
         let pong = Pong::new(runner, Cfg::default());
 
         let game = Game {
@@ -93,8 +137,28 @@ impl Game {
     }
 
     fn on_key_up(&self, event: KeyUpEvent) {
-        match event.code() {
-            _ => unimplemented!(),
+        match event.code().as_ref() {
+            "KeyQ" | "KeyW" => {
+                if !self.pong.left_paddle.auto {
+                    self.pong.left_paddle.stop_moving_up()
+                }
+            }
+            "KeyA" | "KeyS" => {
+                if !self.pong.left_paddle.auto {
+                    self.pong.left_paddle.stop_moving_down()
+                }
+            }
+            "KeyP" | "ArrowUp" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.stop_moving_up()
+                }
+            }
+            "KeyL" | "ArrowDown" => {
+                if !self.pong.right_paddle.auto {
+                    self.pong.right_paddle.stop_moving_down()
+                }
+            }
+            _ => (),
         };
         event.prevent_default()
     }
@@ -161,6 +225,7 @@ impl Runner {
     }
 
     pub fn start(&self) {
+        js! {console.log("PING 🏓 PONG 🏓");}
         unimplemented!()
     }
 }

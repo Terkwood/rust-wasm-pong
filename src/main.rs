@@ -12,14 +12,11 @@ use stdweb::unstable::TryInto;
 use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
-use game::Runner;
+use game::{Game, Runner};
 
 fn main() {
     stdweb::initialize();
-    let message = "PING 🏓 PONG 🏓";
-    js! {
-        alert( @{message} );
-    }
+    Game::new("game", "back");
     stdweb::event_loop();
 }
 
@@ -428,6 +425,14 @@ impl Paddle {
     }
 
     pub fn set_level(&self, level: u32) {
+        unimplemented!()
+    }
+
+    pub fn stop_moving_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn stop_moving_up(&self) {
         unimplemented!()
     }
 
