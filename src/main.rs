@@ -1,3 +1,4 @@
+#![feature(async_await, await_macro, futures_api)]
 #![recursion_limit = "128"]
 
 #[macro_use]
@@ -7,20 +8,40 @@ extern crate stdweb;
 
 mod game;
 
+use futures::{join, try_join};
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
+use stdweb::web::error::Error;
+use stdweb::web::wait;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
+use stdweb::{spawn_local, unwrap_future, PromiseFuture};
 
 use game::{Game, Runner};
 
 fn main() {
     stdweb::initialize();
+
+    spawn_local(unwrap_future(future_main()));
+
     GAME.pong.runner.start();
+
     stdweb::event_loop();
 }
 
+async fn future_main() -> Result<(), Error> {
+    await!(print("Welcome to the Future 🔮", 1666));
+
+    Ok(())
+}
+
+async fn print(message: &str, interval: u32) {
+    // Waits for 2000 milliseconds
+    await!(wait(interval));
+    console!(log, message);
+}
+
 pub fn log_wip() {
-    js! {console.log("PING 🏓 PONG 🏓");}
+    console!(log, "PING 🏓 PONG 🏓");
 }
 
 lazy_static! {

@@ -1,9 +1,13 @@
+use futures::{join, try_join};
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
+use stdweb::web::error::Error;
 use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::set_timeout;
+use stdweb::web::wait;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
+use stdweb::{spawn_local, unwrap_future, PromiseFuture};
 
 use crate::{log_wip, Cfg, Pong};
 
@@ -190,15 +194,32 @@ impl Runner {
      * and is ready to start the game loop.
      */
     pub fn start(&'static self) {
+        // TODO need to be mut
+        // self.stopped = false;
         self.game_loop()
         // TODO self.last_frame = unimplemented!();
         // TODO self.timer = unimplemented!();
     }
 
+    pub fn stop(&'static mut self) {}
+
     fn game_loop(&'static self) {
         log_wip();
-        set_timeout(move || self.game_loop(), self.interval as u32);
-        // TODO allow clear via stopped var
+        if !self.stopped {
+            set_timeout(move || self.game_loop(), self.interval as u32);
+        }
+    }
+
+    /**
+     * javascript `alert` blocks the thread, so we need
+     * to stop the game loop before calling it.
+     */
+    fn alert(&'static self, msg: &str) {
+        // TODO need to be mut
+        // self.stopped = true;
+        let r = window().alert(msg);
+        self.start();
+        r
     }
 }
 
