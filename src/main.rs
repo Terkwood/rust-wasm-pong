@@ -390,7 +390,7 @@ impl Ball {
             dy: 0,
             footprints: vec![],
             speed: max_x - min_x / BALL_SPEED,
-            accel : BALL_ACCEL,
+            accel: BALL_ACCEL,
         };
 
         ball
@@ -400,7 +400,22 @@ impl Ball {
         unimplemented!()
     }
 
-    pub fn reset(&self, player: Option<Player>) {
+    pub fn reset(&mut self, player: Option<Player>) {
+        self.footprints = vec![];
+        self.set_pos(unimplemented!(), unimplemented!());
+        self.set_dir(
+            match player.unwrap_or(Player::One) {
+                Player::One => self.speed,
+                Player::Two => -self.speed,
+            },
+            self.speed,
+        )
+    }
+
+    fn set_pos(&mut self, a: f32, b: f32) {
+        unimplemented!()
+    }
+    fn set_dir(&mut self, a: f32, b: f32) {
         unimplemented!()
     }
 
