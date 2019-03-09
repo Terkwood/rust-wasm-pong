@@ -34,6 +34,10 @@ const PRESS2_IMAGE_FILE: &str = "/press2.png";
 const WINNER_IMAGE_FILE: &str = "/winner.png";
 
 const PADDLE_HEIGHT: f32 = 60.0;
+/**
+ * Paddle should be able to cross court vertically in 2 seconds
+ */
+const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
 
 impl MainState {
@@ -241,7 +245,7 @@ impl Paddle {
             auto: false,
             width: 12.0,
             height: PADDLE_HEIGHT,
-            speed: 2.0,
+            speed: 0.0,
             min_y: WALL_WIDTH,
             max_y: canvas_height - WALL_WIDTH - PADDLE_HEIGHT,
             bottom: 0.0,
@@ -254,6 +258,7 @@ impl Paddle {
             down: 0.0,
             image,
         };
+        paddle.speed = (paddle.max_y - paddle.min_y) / PADDLE_SPEED;
         paddle.set_pos(
             if rhs {
                 canvas_width - paddle.width
