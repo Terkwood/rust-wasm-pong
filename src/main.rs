@@ -447,16 +447,18 @@ impl Ball {
         self.dy = dy;
     }
 
-    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {
+    pub fn update(&self, dt: f32, left: &Paddle, right: &Paddle) {
+        let pos = Ball::accelerate(self.x, self.y, self.dx, self.dy, self.accel, dt);
+
         unimplemented!()
     }
 
-    fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> Acceleration {
+    fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> BallPosition {
         let x2 = x + dt_secs * dx + accel * dt_secs * dt_secs * 0.5;
         let y2 = y + dt_secs * dy + accel * dt_secs * dt_secs * 0.5;
         let dx2 = dx + accel * dt_secs * if dx > 0.0 { 1.0 } else { -1.0 };
         let dy2 = dy + accel * dt_secs * if dy > 0.0 { 1.0 } else { -1.0 };
-        Acceleration {
+        BallPosition {
             nx: x2 - x,
             ny: y2 - y,
             x: x2,
@@ -466,7 +468,7 @@ impl Ball {
         }
     }
 }
-struct Acceleration {
+struct BallPosition {
     nx: f32,
     ny: f32,
     x: f32,
