@@ -2,15 +2,15 @@
 
 🚧 _This project is under construction._ 🚧
 
-A straightforward port of [javascript pong](https://codeincomplete.com/games/pong/) to `rustlang` using [stdweb](https://github.com/koute/stdweb).
-
-Compiled to WebAssembly!
+A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Compiled to WebAssembly!
 
 ## Inspiration
 
 - [zemeroth](https://ozkriff.itch.io/zemeroth)
 - [good-web-game](https://github.com/not-fl3/good-web-game)
 - [pyro](https://github.com/MaikKlein/pyro)
+- [stdweb](https://github.com/koute/stdweb)
+- [wasm and rust](https://github.com/raphamorim/wasm-and-rust)
 
 ## Running Locally
 

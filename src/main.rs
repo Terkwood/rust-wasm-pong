@@ -23,7 +23,9 @@ struct MainState {
     left_paddle: Paddle,
     right_paddle: Paddle,
     images: Images,
-    iter: u64,
+    last_frame: f64,
+    // TODO interval: f32,
+    // TODO fps: u16,
 }
 
 const PADDLE_IMAGE_FILE: &str = "/paddle.png";
@@ -31,26 +33,38 @@ const PRESS1_IMAGE_FILE: &str = "/press1.png";
 const PRESS2_IMAGE_FILE: &str = "/press2.png";
 const WINNER_IMAGE_FILE: &str = "/winner.png";
 
-
 const PADDLE_HEIGHT: f32 = 60.0;
 const WALL_WIDTH: f32 = 12.0;
 
 impl MainState {
     fn new(ctx: &mut Context) -> MainState {
-
         let (size_x, size_y) = canvas_size(ctx);
         MainState {
             score: Score::new(),
-            left_paddle: Paddle::new(graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(), size_x, size_y, false),
-            right_paddle: Paddle::new(graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(), size_x, size_y, true),
+            left_paddle: Paddle::new(
+                graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(),
+                size_x,
+                size_y,
+                false,
+            ),
+            right_paddle: Paddle::new(
+                graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(),
+                size_x,
+                size_y,
+                true,
+            ),
             images: Images {
                 press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
                 press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
                 winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
             },
-            iter: 0, 
+            last_frame: timestamp(),
         }
     }
+}
+
+fn timestamp() -> f64 {
+    stdweb::web::Date::now()
 }
 
 fn canvas_size(ctx: &Context) -> (f32, f32) {
@@ -59,7 +73,14 @@ fn canvas_size(ctx: &Context) -> (f32, f32) {
 }
 impl event::EventHandler for MainState {
     fn update(&mut self, _: &mut Context) -> GameResult {
-        self.iter = self.iter + 1;
+        let start = timestamp();
+        let dt_seconds = (start - self.last_frame) as f32 / 1000.0;
+        self.left_paddle.update(dt_seconds);
+        self.right_paddle.update(dt_seconds);
+
+        // TODO differs from js impl, which assigns last_frame after drawing
+        self.last_frame = start;
+
         Ok(())
     }
 
@@ -70,9 +91,9 @@ impl event::EventHandler for MainState {
             "Digit1" => console!(log, "1"),
             "Digit2" => console!(log, "2"),
             "KeyQ" => console!(log, "Q"),
-            "KeyA" => console!(log, "A"),
+            "KeyA" => self.left_paddle.move_down(),
             "KeyP" => console!(log, "P"),
-            "KeyL" => console!(log, "L"),
+            "KeyL" => self.right_paddle.move_down(),
             &_ => (),
         }
     }
@@ -105,18 +126,14 @@ impl event::EventHandler for MainState {
 
         graphics::draw(
             ctx,
-            &ggez::graphics::Text::new(format!("Res {} x {}", size_x, size_y)),
+            &ggez::graphics::Text::new(
+                format!("Res {} x {}\n", size_x, size_y)
+                    + &format!("Frame {}\n", self.last_frame)
+                    + &format!("Left  {:?}\n", (self.left_paddle.x, self.left_paddle.y))
+                    + &format!("Right  {:?}\n", (self.right_paddle.x, self.right_paddle.y)),
+            ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.90])
-                .scale([1.5, 1.5]),
-        )
-        .unwrap();
-
-        graphics::draw(
-            ctx,
-            &ggez::graphics::Text::new(format!("Iter {}", self.iter)),
-            graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.75, size_y as f32 * 0.93])
                 .scale([1.5, 1.5]),
         )
         .unwrap();
@@ -194,12 +211,6 @@ impl Player {
     }
 }
 
-#[derive(Copy, Clone)]
-enum PaddleDirection {
-    Up,
-    Down,
-}
-
 #[derive(Clone)]
 struct Paddle {
     auto: bool,
@@ -214,26 +225,33 @@ struct Paddle {
     right: f32,
     x: f32,
     y: f32,
-    dir: PaddleDirection,
+    down: f32,
+    up: f32,
     image: ggez::graphics::Image,
 }
 
 impl Paddle {
-    pub fn new(image: ggez::graphics::Image, canvas_width: f32, canvas_height: f32, rhs: bool) -> Paddle {
+    pub fn new(
+        image: ggez::graphics::Image,
+        canvas_width: f32,
+        canvas_height: f32,
+        rhs: bool,
+    ) -> Paddle {
         let mut paddle = Paddle {
-            auto: true,
+            auto: false,
             width: 12.0,
             height: PADDLE_HEIGHT,
             speed: 2.0,
             min_y: WALL_WIDTH,
             max_y: canvas_height - WALL_WIDTH - PADDLE_HEIGHT,
-            dir: PaddleDirection::Up,
             bottom: 0.0,
             left: 0.0,
             right: 0.0,
             top: 0.0,
             x: 0.0,
             y: 0.0,
+            up: 0.0,
+            down: 0.0,
             image,
         };
         paddle.set_pos(
@@ -244,7 +262,14 @@ impl Paddle {
             },
             paddle.min_y + (paddle.max_y - paddle.min_y) / 2.0,
         );
+
+        paddle.set_dir(0.0);
         paddle
+    }
+
+    fn set_dir(&mut self, dy: f32) {
+        self.up = if dy < 0.0 { -dy } else { 0.0 };
+        self.down = if dy > 0.0 { dy } else { 0.0 };
     }
 
     fn set_pos(&mut self, x: f32, y: f32) {
@@ -255,7 +280,6 @@ impl Paddle {
         self.top = self.y;
         self.bottom = self.y + self.height;
     }
-
 
     pub fn draw(&self, ctx: &mut Context) {
         graphics::draw(
@@ -268,12 +292,12 @@ impl Paddle {
         .unwrap()
     }
 
-    pub fn move_down(&self) {
-        unimplemented!()
+    pub fn move_down(&mut self) {
+        self.down = 1.0;
     }
 
-    pub fn move_up(&self) {
-        unimplemented!()
+    pub fn move_up(&mut self) {
+        self.up = 1.0;
     }
 
     pub fn set_auto(&self, on: bool, level: Option<u32>) {
@@ -284,16 +308,32 @@ impl Paddle {
         unimplemented!()
     }
 
-    pub fn stop_moving_down(&self) {
-        unimplemented!()
+    pub fn stop_moving_down(&mut self) {
+        self.down = 0.0;
     }
 
-    pub fn stop_moving_up(&self) {
-        unimplemented!()
+    pub fn stop_moving_up(&mut self) {
+        self.up = 0.0;
     }
 
-    pub fn update(&self, dt: i32 /*, ball: &Ball*/) {
-        unimplemented!()
+    pub fn update(&mut self, dt_secs: f32) {
+        if self.auto {
+            unimplemented!();
+        }
+
+        let amount: f32 = self.down - self.up;
+        //console!(log,format!("Paddle update amount: {}", amount));
+        if amount != 0.0 {
+            let mut y = self.y + amount * dt_secs * self.speed;
+            if y < self.min_y {
+                y = self.min_y;
+            } else if y > self.max_y {
+                y = self.max_y
+            };
+
+            //console!(log,format!("Paddle set_pos: x {}, y {}", self.x, y));
+            self.set_pos(self.x, y);
+        }
     }
 }
 
