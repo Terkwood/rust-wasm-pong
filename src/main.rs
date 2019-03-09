@@ -372,12 +372,10 @@ struct Ball {
     max_y: f32,
     radius: f32,
     speed: f32,
+    accel: f32,
 }
 impl Ball {
     pub fn new(game_width: u32, game_height: u32) -> Ball {
-        // this.speed = ;
-        // this.accel = pong.cfg.ballAccel;
-        // TODO
         let max_x = game_width as f32 - BALL_RADIUS;
         let min_x = BALL_RADIUS;
         let ball = Ball {
@@ -392,6 +390,7 @@ impl Ball {
             dy: 0,
             footprints: vec![],
             speed: max_x - min_x / BALL_SPEED,
+            accel : BALL_ACCEL,
         };
 
         ball
