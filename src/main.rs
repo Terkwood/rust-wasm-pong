@@ -377,6 +377,8 @@ struct Ball {
     right: f32,
     top: f32,
     bottom: f32,
+    dx_changed: bool,
+    dy_changed: bool,
 }
 impl Ball {
     pub fn new(game_width: u32, game_height: u32) -> Ball {
@@ -396,6 +398,8 @@ impl Ball {
             y: 0.0,
             dx: 0.0,
             dy: 0.0,
+            dx_changed: false,
+            dy_changed: false,
             footprints: vec![],
             speed: max_x - min_x / BALL_SPEED,
             accel: BALL_ACCEL,
@@ -410,10 +414,13 @@ impl Ball {
 
     pub fn reset(&mut self, player: Option<Player>) {
         self.footprints = vec![];
-        self.set_pos(match player.unwrap_or(Player::One) {
-            Player::One => self.min_x,
-            Player::Two => self.max_x
-        }, unimplemented!()); // TODO Game.random(this.minY, this.maxY)
+        self.set_pos(
+            match player.unwrap_or(Player::One) {
+                Player::One => self.min_x,
+                Player::Two => self.max_x,
+            },
+            unimplemented!(),
+        ); // TODO Game.random(this.minY, this.maxY)
 
         self.set_dir(
             match player.unwrap_or(Player::One) {
@@ -433,8 +440,11 @@ impl Ball {
         self.bottom = y + self.radius;
     }
 
-    fn set_dir(&mut self, a: f32, b: f32) {
-        unimplemented!()
+    fn set_dir(&mut self, dx: f32, dy: f32) {
+        self.dx_changed = (self.dx < 0.0) != (dx < 0.0); // did horizontal direction change
+        self.dy_changed = (self.dy < 0.0) != (dy < 0.0); // did vertical direction change
+        self.dx = dx;
+        self.dy = dy;
     }
 
     pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
