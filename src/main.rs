@@ -361,10 +361,10 @@ impl Paddle {
 
 #[derive(Clone)]
 struct Ball {
-    left: i32,
-    right: i32,
-    dx: i32,
-    dy: i32,
+    x: f32,
+    y: f32,
+    dx: f32,
+    dy: f32,
     footprints: Vec<bool>,
     min_x: f32,
     max_x: f32,
@@ -373,6 +373,10 @@ struct Ball {
     radius: f32,
     speed: f32,
     accel: f32,
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
 }
 impl Ball {
     pub fn new(game_width: u32, game_height: u32) -> Ball {
@@ -384,10 +388,14 @@ impl Ball {
             max_x,
             min_y: WALL_WIDTH + BALL_RADIUS,
             max_y: game_height as f32 - WALL_WIDTH - BALL_RADIUS,
-            left: 0,
-            right: 0,
-            dx: 0,
-            dy: 0,
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            bottom: 0.0,
+            x: 0.0,
+            y: 0.0,
+            dx: 0.0,
+            dy: 0.0,
             footprints: vec![],
             speed: max_x - min_x / BALL_SPEED,
             accel: BALL_ACCEL,
@@ -402,7 +410,11 @@ impl Ball {
 
     pub fn reset(&mut self, player: Option<Player>) {
         self.footprints = vec![];
-        self.set_pos(unimplemented!(), unimplemented!());
+        self.set_pos(match player.unwrap_or(Player::One) {
+            Player::One => self.min_x,
+            Player::Two => self.max_x
+        }, unimplemented!()); // TODO Game.random(this.minY, this.maxY)
+
         self.set_dir(
             match player.unwrap_or(Player::One) {
                 Player::One => self.speed,
@@ -412,9 +424,15 @@ impl Ball {
         )
     }
 
-    fn set_pos(&mut self, a: f32, b: f32) {
-        unimplemented!()
+    fn set_pos(&mut self, x: f32, y: f32) {
+        self.x = x;
+        self.y = y;
+        self.left = x - self.radius;
+        self.top = y - self.radius;
+        self.right = x + self.radius;
+        self.bottom = y + self.radius;
     }
+
     fn set_dir(&mut self, a: f32, b: f32) {
         unimplemented!()
     }
