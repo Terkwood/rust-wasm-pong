@@ -1,51 +1,315 @@
-#![feature(async_await, await_macro, futures_api)]
 #![recursion_limit = "128"]
+
+#[cfg(not(target_arch = "wasm32"))]
+extern crate ggez;
+#[cfg(target_arch = "wasm32")]
+extern crate good_web_game as ggez;
 
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate stdweb;
 
-mod game;
-
-use futures::{join, try_join};
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
 use stdweb::web::error::Error;
-use stdweb::web::wait;
+
 use stdweb::web::{document, window, CanvasRenderingContext2d};
-use stdweb::{spawn_local, unwrap_future, PromiseFuture};
 
-use game::{Game, Runner};
+use ggez::{event, graphics, Context, GameResult};
 
+struct MainState {
+    score: Score,
+    left_paddle: Paddle,
+    right_paddle: Paddle,
+    images: Images,
+    iter: u64,
+}
+
+const PADDLE_IMAGE_FILE: &str = "/paddle.png";
+const PRESS1_IMAGE_FILE: &str = "/press1.png";
+const PRESS2_IMAGE_FILE: &str = "/press2.png";
+const WINNER_IMAGE_FILE: &str = "/winner.png";
+
+
+const PADDLE_HEIGHT: f32 = 60.0;
+const WALL_WIDTH: f32 = 12.0;
+
+impl MainState {
+    fn new(ctx: &mut Context) -> MainState {
+
+        let (size_x, size_y) = canvas_size(ctx);
+        MainState {
+            score: Score::new(),
+            left_paddle: Paddle::new(graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(), size_x, size_y, false),
+            right_paddle: Paddle::new(graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(), size_x, size_y, true),
+            images: Images {
+                press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
+                press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
+                winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
+            },
+            iter: 0, 
+        }
+    }
+}
+
+fn canvas_size(ctx: &Context) -> (f32, f32) {
+    let (x, y) = ctx.gfx_context.canvas_context.size();
+    (x as f32, y as f32)
+}
+impl event::EventHandler for MainState {
+    fn update(&mut self, _: &mut Context) -> GameResult {
+        self.iter = self.iter + 1;
+        Ok(())
+    }
+
+    fn key_down_event(&mut self, _ctx: &mut Context, key: &str) {
+        match key {
+            "Escape" => console!(log, "ESC"),
+            "Digit0" => console!(log, "0"),
+            "Digit1" => console!(log, "1"),
+            "Digit2" => console!(log, "2"),
+            "KeyQ" => console!(log, "Q"),
+            "KeyA" => console!(log, "A"),
+            "KeyP" => console!(log, "P"),
+            "KeyL" => console!(log, "L"),
+            &_ => (),
+        }
+    }
+
+    fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        graphics::clear(ctx, [0.0, 0.0, 0.0, 1.0].into());
+
+        let (size_x, size_y) = canvas_size(ctx);
+
+        graphics::draw(
+            ctx,
+            &self.images.press1,
+            graphics::DrawParam::default()
+                .dest([size_x as f32 * 0.05, size_y as f32 * 0.05])
+                .scale([1., 1.]),
+        )
+        .unwrap();
+
+        graphics::draw(
+            ctx,
+            &self.images.press2,
+            graphics::DrawParam::default()
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.05])
+                .scale([1., 1.]),
+        )
+        .unwrap();
+
+        self.left_paddle.draw(ctx);
+        self.right_paddle.draw(ctx);
+
+        graphics::draw(
+            ctx,
+            &ggez::graphics::Text::new(format!("Res {} x {}", size_x, size_y)),
+            graphics::DrawParam::default()
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.90])
+                .scale([1.5, 1.5]),
+        )
+        .unwrap();
+
+        graphics::draw(
+            ctx,
+            &ggez::graphics::Text::new(format!("Iter {}", self.iter)),
+            graphics::DrawParam::default()
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.93])
+                .scale([1.5, 1.5]),
+        )
+        .unwrap();
+
+        graphics::present(ctx)
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn main() -> GameResult {
+    use ggez::conf;
+
+    good_web_game::start(
+        conf::Conf {
+            cache: conf::Cache::List(vec![
+                PADDLE_IMAGE_FILE,
+                PRESS1_IMAGE_FILE,
+                PRESS2_IMAGE_FILE,
+                WINNER_IMAGE_FILE,
+            ]),
+            ..Default::default()
+        },
+        |mut context| {
+            let state = MainState::new(&mut context);
+            event::run(context, state)
+        },
+    )
+}
+
+struct Images {
+    press1: graphics::Image,
+    press2: graphics::Image,
+    winner: graphics::Image,
+}
+
+fn level(score: Score, player: Player) -> u32 {
+    let x = score.of(player);
+    let y = score.of(player.other());
+    8 + (x - y)
+}
+
+#[derive(Copy, Clone)]
+struct Score(u32, u32);
+impl Score {
+    pub fn new() -> Score {
+        Score(0, 0)
+    }
+
+    pub fn of(self, player: Player) -> u32 {
+        match player {
+            Player::One => self.0,
+            Player::Two => self.1,
+        }
+    }
+
+    /*pub fn incr(mut self, player: Player) {
+        match player {
+            Player::One => self.0 = self.0 + 1,
+            Player::Two => self.1 = self.1 + 1,
+        }
+    }*/
+}
+
+#[derive(Copy, Clone)]
+enum Player {
+    One,
+    Two,
+}
+impl Player {
+    pub fn other(self) -> Player {
+        match self {
+            Player::One => Player::Two,
+            Player::Two => Player::One,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+enum PaddleDirection {
+    Up,
+    Down,
+}
+
+#[derive(Clone)]
+struct Paddle {
+    auto: bool,
+    width: f32,
+    height: f32,
+    min_y: f32,
+    max_y: f32,
+    speed: f32,
+    top: f32,
+    bottom: f32,
+    left: f32,
+    right: f32,
+    x: f32,
+    y: f32,
+    dir: PaddleDirection,
+    image: ggez::graphics::Image,
+}
+
+impl Paddle {
+    pub fn new(image: ggez::graphics::Image, canvas_width: f32, canvas_height: f32, rhs: bool) -> Paddle {
+        let mut paddle = Paddle {
+            auto: true,
+            width: 12.0,
+            height: PADDLE_HEIGHT,
+            speed: 2.0,
+            min_y: WALL_WIDTH,
+            max_y: canvas_height - WALL_WIDTH - PADDLE_HEIGHT,
+            dir: PaddleDirection::Up,
+            bottom: 0.0,
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            x: 0.0,
+            y: 0.0,
+            image,
+        };
+        paddle.set_pos(
+            if rhs {
+                canvas_width - paddle.width
+            } else {
+                0.0
+            },
+            paddle.min_y + (paddle.max_y - paddle.min_y) / 2.0,
+        );
+        paddle
+    }
+
+    fn set_pos(&mut self, x: f32, y: f32) {
+        self.x = x;
+        self.y = y;
+        self.left = self.x;
+        self.right = self.left + self.width;
+        self.top = self.y;
+        self.bottom = self.y + self.height;
+    }
+
+
+    pub fn draw(&self, ctx: &mut Context) {
+        graphics::draw(
+            ctx,
+            &self.image,
+            graphics::DrawParam::default()
+                .dest([self.x, self.y])
+                .scale([1., 1.]),
+        )
+        .unwrap()
+    }
+
+    pub fn move_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn move_up(&self) {
+        unimplemented!()
+    }
+
+    pub fn set_auto(&self, on: bool, level: Option<u32>) {
+        unimplemented!()
+    }
+
+    pub fn set_level(&self, level: u32) {
+        unimplemented!()
+    }
+
+    pub fn stop_moving_down(&self) {
+        unimplemented!()
+    }
+
+    pub fn stop_moving_up(&self) {
+        unimplemented!()
+    }
+
+    pub fn update(&self, dt: i32 /*, ball: &Ball*/) {
+        unimplemented!()
+    }
+}
+
+// LEGACY "MAGIC"
+
+//mod game;
+//use game::{Game, Runner};
+/*
 fn main() {
     stdweb::initialize();
-
-    spawn_local(unwrap_future(future_main()));
-
-    GAME.pong.runner.start();
 
     stdweb::event_loop();
 }
 
-async fn future_main() -> Result<(), Error> {
-    await!(print("Welcome to the Future 🔮", 1666));
-
-    Ok(())
-}
-
-async fn print(message: &str, interval: u32) {
-    // Waits for 2000 milliseconds
-    await!(wait(interval));
-    console!(log, message);
-}
-
 pub fn log_wip() {
     console!(log, "PING 🏓 PONG 🏓");
-}
-
-lazy_static! {
-    pub static ref GAME: Game = Game::new("game", "back");
 }
 
 //=============================================================================
@@ -294,47 +558,6 @@ impl Pong {
     }
 }
 
-fn level(score: Score, player: Player) -> u32 {
-    let x = score.of(player);
-    let y = score.of(player.other());
-    8 + (x - y)
-}
-
-#[derive(Copy, Clone)]
-struct Score(u32, u32);
-impl Score {
-    pub fn new() -> Score {
-        Score(0, 0)
-    }
-
-    pub fn of(self, player: Player) -> u32 {
-        match player {
-            Player::One => self.0,
-            Player::Two => self.1,
-        }
-    }
-
-    pub fn incr(mut self, player: Player) {
-        match player {
-            Player::One => self.0 = self.0 + 1,
-            Player::Two => self.1 = self.1 + 1,
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-enum Player {
-    One,
-    Two,
-}
-impl Player {
-    pub fn other(self) -> Player {
-        match self {
-            Player::One => Player::Two,
-            Player::Two => Player::One,
-        }
-    }
-}
 
 //=============================================================================
 // MENU
@@ -408,48 +631,6 @@ impl Court {
 // PADDLE
 //=============================================================================
 
-#[derive(Clone)]
-struct Paddle {
-    auto: bool,
-}
-impl Paddle {
-    pub fn new() -> Paddle {
-        //TODO
-        Paddle { auto: true }
-    }
-
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        unimplemented!()
-    }
-
-    pub fn move_down(&self) {
-        unimplemented!()
-    }
-
-    pub fn move_up(&self) {
-        unimplemented!()
-    }
-
-    pub fn set_auto(&self, on: bool, level: Option<u32>) {
-        unimplemented!()
-    }
-
-    pub fn set_level(&self, level: u32) {
-        unimplemented!()
-    }
-
-    pub fn stop_moving_down(&self) {
-        unimplemented!()
-    }
-
-    pub fn stop_moving_up(&self) {
-        unimplemented!()
-    }
-
-    pub fn update(&self, dt: i32, ball: &Ball) {
-        unimplemented!()
-    }
-}
 
 //=============================================================================
 // BALL
@@ -485,7 +666,4 @@ impl Ball {
 
     pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
 }
-
-//=============================================================================
-// HELPER
-//=============================================================================
+*/

@@ -6,8 +6,14 @@ A straightforward port of [javascript pong](https://codeincomplete.com/games/pon
 
 Compiled to WebAssembly!
 
+## Inspiration
+
+- [zemeroth](https://ozkriff.itch.io/zemeroth)
+- [good-web-game](https://github.com/not-fl3/good-web-game)
+- [pyro](https://github.com/MaikKlein/pyro)
+
 ## Running Locally
 
 ```sh
-cargo web start
+cargo web start --release
 ```

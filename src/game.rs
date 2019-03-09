@@ -1,15 +1,10 @@
-use futures::{join, try_join};
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
-use stdweb::web::error::Error;
-use stdweb::web::event::{KeyDownEvent, KeyUpEvent};
-use stdweb::web::html_element::CanvasElement;
-use stdweb::web::set_timeout;
-use stdweb::web::wait;
-use stdweb::web::{document, window, CanvasRenderingContext2d};
-use stdweb::{spawn_local, unwrap_future, PromiseFuture};
 
-use crate::{log_wip, Cfg, Pong};
+use stdweb::web::event::KeyDownEvent;
+use stdweb::web::html_element::CanvasElement;
+
+use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 // From webplatform's TodoMVC example.
 #[macro_export]
@@ -23,42 +18,24 @@ macro_rules! enclose_mut {
 }
 
 #[derive(Clone)]
-pub struct Game {
-    pub pong: Box<Pong>,
-}
+pub struct Game {}
 
 impl Game {
     /**
-    * Create a new instance of the game, exposing methods relating
-    * to canvas manipulation, HTML audio, receiving keyboard input,
-    * etc.
-    *
-    * Renamed from `start` in the original version.
-    * Removed the `game` and `cfg` args from the original version.
-    *
-    * It's essential to use the `enclose!` macro to help clone
+    * Use the `enclose!` macro to help clone
     * Game when it's called for keyup events. See
     * https://github.com/koute/stdweb/blob/dff1e06086124fe79e3393a99ae8e2d424f5b2f1/examples/canvas/src/main.rs
     *
-    * Also see these for info on handling key press:
+    * See these for info on handling key press:
     * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
     * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
 
     */
-    pub fn new(front_canvas_id: &str, back_canvas_id: &str) -> Self {
-        let runner = Box::new(Runner::new(front_canvas_id, back_canvas_id));
-
-        let pong = Pong::new(runner, Cfg::default());
-
-        let game = Game {
-            pong: Box::new(pong),
-        };
+    pub fn new(front_canvas_id: &str) -> Self {
+        let game = Game {};
 
         window().add_event_listener(enclose_mut!((game) move |event: KeyDownEvent|
             game.on_key_down(event)));
-
-        window().add_event_listener(enclose_mut!((game) move |event: KeyUpEvent|
-            game.on_key_up(event)));
 
         game
     }
@@ -70,58 +47,8 @@ impl Game {
      */
     fn on_key_down(&mut self, event: KeyDownEvent) {
         match event.code().as_ref() {
-            "Digit0" => self.pong.start_demo(),
-            "Digit1" => self.pong.start_single_player(),
-            "Digit2" => self.pong.start_double_player(),
-            "Escape" => self.pong.stop(true),
-            "KeyQ" | "KeyW" => {
-                if !self.pong.left_paddle.auto {
-                    self.pong.left_paddle.move_up()
-                }
-            }
-            "KeyA" | "KeyS" => {
-                if !self.pong.left_paddle.auto {
-                    self.pong.left_paddle.move_down()
-                }
-            }
-            "KeyP" | "ArrowUp" => {
-                if !self.pong.right_paddle.auto {
-                    self.pong.right_paddle.move_up()
-                }
-            }
-            "KeyL" | "ArrowDown" => {
-                if !self.pong.right_paddle.auto {
-                    self.pong.right_paddle.move_down()
-                }
-            }
+            "Digit0" => (),
             &_ => (),
-        };
-        event.prevent_default()
-    }
-
-    fn on_key_up(&self, event: KeyUpEvent) {
-        match event.code().as_ref() {
-            "KeyQ" | "KeyW" => {
-                if !self.pong.left_paddle.auto {
-                    self.pong.left_paddle.stop_moving_up()
-                }
-            }
-            "KeyA" | "KeyS" => {
-                if !self.pong.left_paddle.auto {
-                    self.pong.left_paddle.stop_moving_down()
-                }
-            }
-            "KeyP" | "ArrowUp" => {
-                if !self.pong.right_paddle.auto {
-                    self.pong.right_paddle.stop_moving_up()
-                }
-            }
-            "KeyL" | "ArrowDown" => {
-                if !self.pong.right_paddle.auto {
-                    self.pong.right_paddle.stop_moving_down()
-                }
-            }
-            _ => (),
         };
         event.prevent_default()
     }
@@ -196,19 +123,12 @@ impl Runner {
     pub fn start(&'static self) {
         // TODO need to be mut
         // self.stopped = false;
-        self.game_loop()
+        // self.game_loop()
         // TODO self.last_frame = unimplemented!();
         // TODO self.timer = unimplemented!();
     }
 
     pub fn stop(&'static mut self) {}
-
-    fn game_loop(&'static self) {
-        log_wip();
-        if !self.stopped {
-            set_timeout(move || self.game_loop(), self.interval as u32);
-        }
-    }
 
     /**
      * javascript `alert` blocks the thread, so we need
