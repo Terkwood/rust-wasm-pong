@@ -484,6 +484,39 @@ impl Ball {
     }
 
     fn intercept(&self, paddle: &Paddle, nx: f32, ny: f32) {
+        fn friend(
+            x1: f32,
+            y1: f32,
+            x2: f32,
+            y2: f32,
+            x3: f32,
+            y3: f32,
+            x4: f32,
+            y4: f32,
+            d: f32,
+        ) -> Option<BallIntercept> {
+            let denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+            if denom != 0.0 {
+                let ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+                if ua >= 0.0 && ua <= 1.0 {
+                    let ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+                    if ub >= 0.0 && ub <= 1.0 {
+                        let x = x1 + ua * (x2 - x1);
+                        let y = y1 + ua * (y2 - y1);
+                        return Some(BallIntercept { x, y, d });
+                    }
+                }
+            }
+            return None;
+        }
+
+        let mut pt = 0.0;
+
+        if nx < 0.0 {
+
+        } else if nx > 0.0 {
+
+        }
         unimplemented!()
     }
 }
@@ -494,6 +527,11 @@ struct BallPosition {
     y: f32,
     dx: f32,
     dy: f32,
+}
+struct BallIntercept {
+    x: f32,
+    y: f32,
+    d: f32,
 }
 
 // LEGACY "MAGIC"
