@@ -151,10 +151,7 @@ impl event::EventHandler for MainState {
         graphics::draw(
             ctx,
             &ggez::graphics::Text::new(
-                format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Frame {}\n", self.last_frame)
-                    + &format!("Left  {:?}\n", (self.left_paddle.x, self.left_paddle.y))
-                    + &format!("Right  {:?}\n", (self.right_paddle.x, self.right_paddle.y)),
+                format!("Res {} x {}\n", size_x, size_y) + &format!("Frame {}\n", self.last_frame),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.90])
@@ -369,25 +366,35 @@ struct Ball {
     dx: i32,
     dy: i32,
     footprints: Vec<bool>,
+    min_x: f32,
+    max_x: f32,
+    min_y: f32,
+    max_y: f32,
+    radius: f32,
+    speed: f32,
 }
 impl Ball {
-    pub fn new() -> Ball {
-        /*this.pong = pong;
-        this.radius = pong.cfg.ballRadius;
-        this.minX = this.radius;
-        this.maxX = pong.width - this.radius;
-        this.minY = pong.cfg.wallWidth + this.radius;
-        this.maxY = pong.height - pong.cfg.wallWidth - this.radius;
-        this.speed = (this.maxX - this.minX) / pong.cfg.ballSpeed;
-        this.accel = pong.cfg.ballAccel;*/
-        // TODO punted
-        Ball {
+    pub fn new(game_width: u32, game_height: u32) -> Ball {
+        // this.speed = ;
+        // this.accel = pong.cfg.ballAccel;
+        // TODO
+        let max_x = game_width as f32 - BALL_RADIUS;
+        let min_x = BALL_RADIUS;
+        let ball = Ball {
+            radius: BALL_RADIUS,
+            min_x,
+            max_x,
+            min_y: WALL_WIDTH + BALL_RADIUS,
+            max_y: game_height as f32 - WALL_WIDTH - BALL_RADIUS,
             left: 0,
             right: 0,
             dx: 0,
             dy: 0,
             footprints: vec![],
-        }
+            speed: max_x - min_x / BALL_SPEED,
+        };
+
+        ball
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
