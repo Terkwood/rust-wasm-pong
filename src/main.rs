@@ -447,8 +447,23 @@ impl Ball {
         self.dy = dy;
     }
 
-    pub fn update(&self, dt: f32, left: &Paddle, right: &Paddle) {
-        let pos = Ball::accelerate(self.x, self.y, self.dx, self.dy, self.accel, dt);
+    pub fn update(&self, dt: f32, left_paddle: &Paddle, right_paddle: &Paddle) {
+        let mut pos = Ball::accelerate(self.x, self.y, self.dx, self.dy, self.accel, dt);
+
+        if pos.dy > 0.0 && pos.y > self.max_y {
+            pos.y = self.max_y;
+            pos.dy = -pos.dy;
+        } else if pos.dy < 0.0 && pos.y < self.min_y {
+            pos.y = self.min_y;
+            pos.dy = -pos.dy;
+        }
+
+        let paddle = if pos.dx < 0.0 {
+            left_paddle
+        } else {
+            right_paddle
+        };
+        let pt = self.intercept(paddle, pos.nx, pos.ny);
 
         unimplemented!()
     }
@@ -466,6 +481,10 @@ impl Ball {
             dx: dx2,
             dy: dy2,
         }
+    }
+
+    fn intercept(&self, paddle: &Paddle, nx: f32, ny: f32) {
+        unimplemented!()
     }
 }
 struct BallPosition {
