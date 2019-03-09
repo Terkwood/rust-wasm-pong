@@ -507,7 +507,8 @@ impl Ball {
                     }
                 }
             }
-            return None;
+            
+            None
         }
 
         let mut pt = 0.0;
