@@ -39,6 +39,16 @@ const PADDLE_HEIGHT: f32 = 60.0;
  */
 const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
+const BALL_RADIUS: f32 = 5.0;
+/**
+ * Ball should be able to cross court horizontally in 4 seconds,
+ * at starting speed.
+ */
+const BALL_SPEED: f32 = 4.0;
+/**
+ * Accelerate as time passes.
+ */
+const BALL_ACCEL: f32 = 8.0;
 
 impl MainState {
     fn new(ctx: &mut Context) -> MainState {
@@ -350,6 +360,45 @@ impl Paddle {
             self.set_pos(self.x, y);
         }
     }
+}
+
+#[derive(Clone)]
+struct Ball {
+    left: i32,
+    right: i32,
+    dx: i32,
+    dy: i32,
+    footprints: Vec<bool>,
+}
+impl Ball {
+    pub fn new() -> Ball {
+        /*this.pong = pong;
+        this.radius = pong.cfg.ballRadius;
+        this.minX = this.radius;
+        this.maxX = pong.width - this.radius;
+        this.minY = pong.cfg.wallWidth + this.radius;
+        this.maxY = pong.height - pong.cfg.wallWidth - this.radius;
+        this.speed = (this.maxX - this.minX) / pong.cfg.ballSpeed;
+        this.accel = pong.cfg.ballAccel;*/
+        // TODO punted
+        Ball {
+            left: 0,
+            right: 0,
+            dx: 0,
+            dy: 0,
+            footprints: vec![],
+        }
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn reset(&self, player: Option<Player>) {
+        unimplemented!()
+    }
+
+    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
 }
 
 // LEGACY "MAGIC"
@@ -682,43 +731,4 @@ impl Court {
     }
 }
 
-//=============================================================================
-// PADDLE
-//=============================================================================
-
-
-//=============================================================================
-// BALL
-//=============================================================================
-
-#[derive(Clone)]
-struct Ball {
-    left: i32,
-    right: i32,
-    dx: i32,
-    dy: i32,
-    footprints: Vec<bool>,
-}
-impl Ball {
-    pub fn new() -> Ball {
-        // TODO punted
-        Ball {
-            left: 0,
-            right: 0,
-            dx: 0,
-            dy: 0,
-            footprints: vec![],
-        }
-    }
-
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        unimplemented!()
-    }
-
-    pub fn reset(&self, player: Option<Player>) {
-        unimplemented!()
-    }
-
-    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
-}
 */
