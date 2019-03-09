@@ -94,10 +94,20 @@ impl event::EventHandler for MainState {
             "Digit0" => console!(log, "0"),
             "Digit1" => console!(log, "1"),
             "Digit2" => console!(log, "2"),
-            "KeyQ" => console!(log, "Q"),
+            "KeyQ" => self.left_paddle.move_up(),
             "KeyA" => self.left_paddle.move_down(),
-            "KeyP" => console!(log, "P"),
+            "KeyP" => self.right_paddle.move_up(),
             "KeyL" => self.right_paddle.move_down(),
+            &_ => (),
+        }
+    }
+
+    fn key_up_event(&mut self, _ctx: &mut Context, key: &str) {
+        match key {
+            "KeyQ" => self.left_paddle.stop_moving_up(),
+            "KeyA" => self.left_paddle.stop_moving_down(),
+            "KeyP" => self.right_paddle.stop_moving_up(),
+            "KeyL" => self.right_paddle.stop_moving_down(),
             &_ => (),
         }
     }

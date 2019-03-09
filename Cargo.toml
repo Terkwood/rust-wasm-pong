@@ -5,7 +5,7 @@ authors = ["Terkwood <metaterkhorn@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-good-web-game = { git = "https://github.com/not-fl3/good-web-game" }
+good-web-game = { git = "https://github.com/Terkwood/good-web-game", branch = "feature/on_key_up" }
 lazy_static = "*"
 stdweb = "0.4.14"
 
