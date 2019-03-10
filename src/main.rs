@@ -229,11 +229,16 @@ impl event::EventHandler for MainState {
         )
         .unwrap();
 
+        // line up the right edge with 95% of the screen's width
+        let mostly_right = size_x as f32 * 0.95;
         graphics::draw(
             ctx,
             &self.images.press2,
             graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.75, size_y as f32 * 0.05])
+                .dest([
+                    mostly_right - self.images.press2.width() as f32,
+                    size_y as f32 * 0.05,
+                ])
                 .scale([1., 1.]),
         )
         .unwrap();
@@ -252,7 +257,7 @@ impl event::EventHandler for MainState {
             &ggez::graphics::Text::new(
                 format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Frame {}\n", self.last_frame as u64 % 100000)
-                    + &format!("Speed {}\n", self.ball.speed),
+                    + &format!("Accel {}\n", self.ball.accel),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
