@@ -112,7 +112,6 @@ impl MainState {
             self.right_paddle
                 .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
             self.ball.reset(None);
-            console!(log, "BRING IT ON");
             // TODO self.hide_cursor();
         }
     }
@@ -134,7 +133,7 @@ impl MainState {
         if self.score.of(player) == 9 {
             // TODO self.menu.declare_winner(player);
             // TODO self.stop(false);
-            console!(log, "MEGA WINNER");
+            console!(log, "🏆 W I N N E R 🏆");
         } else {
             self.ball.reset(Some(player));
             self.left_paddle.set_level(level(self.score, Player::One));
@@ -159,6 +158,7 @@ fn canvas_size(ctx: &Context) -> (f32, f32) {
     let (x, y) = ctx.gfx_context.canvas_context.size();
     (x as f32, y as f32)
 }
+
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         let start = timestamp();
@@ -183,7 +183,6 @@ impl event::EventHandler for MainState {
             }
         }
 
-        // TODO differs from js impl, which assigns last_frame after drawing
         self.last_frame = start;
 
         Ok(())
@@ -355,6 +354,25 @@ struct Paddle {
     up: f32,
     image: ggez::graphics::Image,
     level: Option<Level>,
+    prediction: Option<Prediction>,
+}
+
+#[derive(Copy, Clone)]
+struct Rect {
+    top: f32,
+    bottom: f32,
+    left: f32,
+    right: f32,
+}
+impl From<Paddle> for Rect {
+    fn from(paddle: Paddle) -> Rect {
+        Rect {
+            top: paddle.top,
+            bottom: paddle.bottom,
+            left: paddle.left,
+            right: paddle.right,
+        }
+    }
 }
 
 impl Paddle {
@@ -382,6 +400,7 @@ impl Paddle {
             up: 0.0,
             down: 0.0,
             image,
+            prediction: None,
         };
         paddle.speed = (paddle.max_y - paddle.min_y) / PADDLE_SPEED;
         paddle.set_pos(
@@ -470,6 +489,108 @@ impl Paddle {
             self.set_pos(self.x, y);
         }
     }
+
+    fn bot(&mut self, dt_secs: f32, ball: &Ball, game_width: f32) {
+        if (ball.x < self.left && ball.dx < 0.0) || (ball.x > self.right && ball.dx > 0.0) {
+            self.stop_moving_up();
+            self.stop_moving_down();
+            return;
+        }
+
+        self.predict(ball, dt_secs, game_width);
+
+        if let Some(p) = self.prediction {
+            if p.y < self.top + self.height / 2.0 - 5.0 {
+                self.stop_moving_down();
+                self.move_up();
+            } else if p.y > self.bottom - self.height / 2.0 + 5.0 {
+                self.stop_moving_up();
+                self.move_down();
+            } else {
+                self.stop_moving_up();
+                self.stop_moving_down();
+            }
+        }
+    }
+
+    fn predict(&mut self, ball: &Ball, dt_secs: f32, game_width: f32) {
+        // only re-predict if the ball changed direction, or its been some amount of time since last prediction
+        if let Some(mut p) = self.prediction {
+            if p.dx * ball.dx > 0.0
+                && p.dy * ball.dy > 0.0
+                && p.since < self.level.map(|l| l.ai_reaction).unwrap_or(0.0)
+            {
+                p.since = p.since + dt_secs;
+                self.prediction = Some(p);
+                return;
+            }
+        }
+
+        let mut maybe_pt = Ball::intercept(
+            ball,
+            Rect {
+                left: self.left,
+                right: self.right,
+                top: -10000.0,
+                bottom: 10000.0,
+            },
+            ball.dx * 10.0,
+            ball.dy * 10.0,
+        );
+        if let Some(mut pt) = maybe_pt {
+            let t = self.min_y + ball.radius;
+            let b = self.max_y + self.height - ball.radius;
+
+            while (pt.y < t || pt.y > b) {
+                if (pt.y < t) {
+                    pt.y = t + (t - pt.y);
+                } else if (pt.y > b) {
+                    pt.y = t + (b - t) - (pt.y - b);
+                }
+            }
+
+            self.prediction = Some(Prediction::from(pt));
+        } else {
+            self.prediction = None;
+        }
+
+        if let Some(mut p) = self.prediction {
+            p.since = 0.0;
+            p.dx = ball.dx;
+            p.dy = ball.dy;
+            p.radius = ball.radius;
+            let closeness = if ball.dx < 0.0 {
+                ball.x - self.right
+            } else {
+                self.left - ball.x
+            } / game_width;
+            // TODO is the unwrap_or ok ?
+            let error = self.level.map(|l| l.ai_error).unwrap_or(0) as f32 * closeness;
+            let mut rng = rand::thread_rng();
+            p.y = p.y + rng.gen_range(-error, error);
+            self.prediction = Some(p);
+        }
+    }
+}
+
+impl From<BallIntercept> for Prediction {
+    fn from(bi: BallIntercept) -> Self {
+        Prediction {
+            x: bi.x,
+            y: bi.y,
+            ..Default::default()
+        }
+    }
+}
+
+#[derive(Default, Copy, Clone)]
+struct Prediction {
+    x: f32,
+    y: f32,
+    dx: f32,
+    dy: f32,
+    since: f32,
+    radius: f32,
 }
 
 #[derive(Clone)]
@@ -544,8 +665,8 @@ impl Ball {
             for n in 0..max {
                 // TODO
                 //   ctx.strokeRect (
-                //     this.footprints[n].x - this.radius,
-                //     this.footprints[n].y - this.radius,
+                //     self.footprints[n].x - self.radius,
+                //     self.footprints[n].y - self.radius,
                 //     w,
                 //     h
                 //   );
@@ -606,7 +727,7 @@ impl Ball {
             right_paddle
         };
 
-        if let Some(pt) = Ball::intercept(self, paddle, pos.nx, pos.ny) {
+        if let Some(pt) = Ball::intercept(self, Rect::from(paddle.clone()), pos.nx, pos.ny) {
             match pt.d {
                 Side::Left | Side::Right => {
                     pos.x = pt.x;
@@ -646,7 +767,7 @@ impl Ball {
         }
     }
 
-    fn intercept(ball: &Ball, paddle: &Paddle, nx: f32, ny: f32) -> Option<BallIntercept> {
+    fn intercept(ball: &Ball, paddle: Rect, nx: f32, ny: f32) -> Option<BallIntercept> {
         fn solve(
             x1: f32,
             y1: f32,
