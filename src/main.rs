@@ -463,9 +463,19 @@ impl Ball {
         } else {
             right_paddle
         };
-        let pt = Ball::intercept(self, paddle, pos.nx, pos.ny);
 
-        unimplemented!()
+        if let Some(pt) = Ball::intercept(self, paddle, pos.nx, pos.ny) {
+            match pt.d {
+                Side::Left | Side::Right => {
+                    pos.x = pt.x;
+                    pos.dx = -pos.dx;
+                }
+                Side::Top | Side::Bottom => {
+                    pos.y = pt.y;
+                    pos.dy = -pos.dy
+                }
+            }
+        }
     }
 
     fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> BallPosition {
