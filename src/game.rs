@@ -108,14 +108,6 @@ impl Runner {
         unimplemented!()
     }
 
-    pub fn hide_cursor(&self) {
-        unimplemented!()
-    }
-
-    pub fn show_cursor(&self) {
-        unimplemented!()
-    }
-
     /**
      * game instance should call runner.start() when its finished initializing
      * and is ready to start the game loop.

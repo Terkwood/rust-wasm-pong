@@ -80,10 +80,64 @@ impl MainState {
         }
     }
 
-    fn goal(&mut self, player: Player) {
-        console!(log, format!("🥅 {:?} GOAL 🥅", player))
-        // TODO
+
+    fn start_demo(&mut self) {
+        self.start(0)
     }
+
+    fn start_single_player(&mut self) {
+        self.start(1)
+    }
+
+    fn start_double_player(&mut self) {
+        self.start(2)
+    }
+
+    fn start(&mut self, num_players: u32) {
+        if (!self.playing) {
+            self.score = Score::new();
+            self.playing = true;
+            self.left_paddle.set_auto(num_players < 1, unimplemented!());
+            self.right_paddle
+                .set_auto(num_players < 2, unimplemented!());
+            self.ball.reset(None);
+            // TODO self.hide_cursor();
+        }
+    }
+
+    // TODO
+    // fn stop(&mut self, ask: bool) {
+    //     if self.playing && (!ask || self.alert("Abandon game in progress?")) {
+    //         self.playing = false;
+    //         self.left_paddle.set_auto(false, None);
+    //         self.right_paddle.set_auto(false, None);
+    //         // TODO self.show_cursor();
+    //     }
+    // }
+
+    fn goal(&mut self, player: Player) {
+        console!(log, format!("🥅 {:?} GOAL 🥅", player));
+        // TODO self.sounds.goal();
+        self.score.incr(player);
+        if self.score.of(player) == 9 {
+            // TODO self.menu.declare_winner(player);
+            // TODO self.stop(false);
+            console!(log, "MEGA WINNER");
+        } else {
+            self.ball.reset(Some(player));
+            self.left_paddle.set_level(level(self.score, Player::One));
+            self.right_paddle.set_level(level(self.score, Player::Two));
+        }
+    }
+
+    fn hide_cursor(&self) {
+        unimplemented!()
+    }
+
+    fn show_cursor(&self) {
+        unimplemented!()
+    }
+
 }
 
 fn timestamp() -> f64 {
@@ -177,10 +231,10 @@ impl event::EventHandler for MainState {
         graphics::draw(
             ctx,
             &ggez::graphics::Text::new(
-                format!("Res {} x {}\n", size_x, size_y) + &format!("Frame {}\n", self.last_frame),
+                format!("Res {} x {}\n", size_x, size_y) + &format!("Frame {}\n", self.last_frame) + &format!("Ball x {} y {}", self.ball.x, self.ball.y),
             ),
             graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.75, size_y as f32 * 0.90])
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
                 .scale([1.5, 1.5]),
         )
         .unwrap();
@@ -236,12 +290,12 @@ impl Score {
         }
     }
 
-    /*pub fn incr(mut self, player: Player) {
+    pub fn incr(mut self, player: Player) {
         match player {
             Player::One => self.0 = self.0 + 1,
             Player::Two => self.1 = self.1 + 1,
         }
-    }*/
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -800,51 +854,7 @@ impl Pong {
         pong
     }
 
-    fn start_demo(&mut self) {
-        self.start(0)
-    }
 
-    fn start_single_player(&mut self) {
-        self.start(1)
-    }
-
-    fn start_double_player(&mut self) {
-        self.start(2)
-    }
-
-    fn start(&mut self, num_players: u32) {
-        if (!self.playing) {
-            self.score = Score::new();
-            self.playing = true;
-            self.left_paddle.set_auto(num_players < 1, unimplemented!());
-            self.right_paddle
-                .set_auto(num_players < 2, unimplemented!());
-            self.ball.reset(None);
-            self.runner.hide_cursor();
-        }
-    }
-
-    fn stop(&mut self, ask: bool) {
-        if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
-            self.playing = false;
-            self.left_paddle.set_auto(false, None);
-            self.right_paddle.set_auto(false, None);
-            self.runner.show_cursor();
-        }
-    }
-
-    fn goal(&mut self, player: Player) {
-        self.sounds.goal();
-        self.score.incr(player);
-        if self.score.of(player) == 9 {
-            self.menu.declare_winner(player);
-            self.stop(false);
-        } else {
-            self.ball.reset(Some(player));
-            self.left_paddle.set_level(level(self.score, Player::One));
-            self.right_paddle.set_level(level(self.score, Player::Two));
-        }
-    }
 
     fn update(&mut self, dt: i32) {
         self.left_paddle.update(dt, &self.ball);
