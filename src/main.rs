@@ -475,6 +475,17 @@ impl Ball {
                     pos.dy = -pos.dy
                 }
             }
+
+            // add/remove spin based on paddle direction
+            if paddle.up != 0.0 {
+                pos.dy = pos.dy * if pos.dy < 0.0 { 0.5 } else { 1.5 };
+            } else if paddle.down != 0.0 {
+                pos.dy = pos.dy * if pos.dy > 0.0 { 0.5 } else { 1.5 };
+            }
+
+            self.set_pos(pos.x, pos.y);
+            self.set_dir(pos.dx, pos.dy);
+            // TODO self.footprint()
         }
     }
 
