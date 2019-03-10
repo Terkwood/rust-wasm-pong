@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 good-web-game = { git = "https://github.com/Terkwood/good-web-game", branch = "feature/on_key_up" }
 lazy_static = "*"
-rand = "*"
+rand = { version = "0.6.5", features = ["stdweb"] }
 stdweb = "0.4.14"
 
 [profile.release]
