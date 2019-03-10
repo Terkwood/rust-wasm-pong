@@ -447,7 +447,7 @@ impl Ball {
         self.dy = dy;
     }
 
-    pub fn update(&self, dt: f32, left_paddle: &Paddle, right_paddle: &Paddle) {
+    pub fn update(&mut self, dt: f32, left_paddle: &Paddle, right_paddle: &Paddle) {
         let mut pos = Ball::accelerate(self.x, self.y, self.dx, self.dy, self.accel, dt);
 
         if pos.dy > 0.0 && pos.y > self.max_y {
@@ -463,7 +463,7 @@ impl Ball {
         } else {
             right_paddle
         };
-        let pt = self.intercept(paddle, pos.nx, pos.ny);
+        let pt = Ball::intercept(self, paddle, pos.nx, pos.ny);
 
         unimplemented!()
     }
@@ -483,8 +483,8 @@ impl Ball {
         }
     }
 
-    fn intercept(&self, paddle: &Paddle, nx: f32, ny: f32) {
-        fn friend(
+    fn intercept(ball: &Ball, paddle: &Paddle, nx: f32, ny: f32) {
+        fn solve(
             x1: f32,
             y1: f32,
             x2: f32,
@@ -493,7 +493,7 @@ impl Ball {
             y3: f32,
             x4: f32,
             y4: f32,
-            d: f32,
+            d: Side,
         ) -> Option<BallIntercept> {
             let denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
             if denom != 0.0 {
@@ -507,16 +507,26 @@ impl Ball {
                     }
                 }
             }
-            
+
             None
         }
 
-        let mut pt = 0.0;
+        let mut pt = None;
 
         if nx < 0.0 {
-
+            pt = solve(
+                ball.x,
+                ball.y,
+                ball.x + nx,
+                ball.y + ny,
+                paddle.right + ball.radius,
+                paddle.top - ball.radius,
+                paddle.right + ball.radius,
+                paddle.bottom + ball.radius,
+                Side::Right,
+            );
         } else if nx > 0.0 {
-
+            unimplemented!()
         }
         unimplemented!()
     }
@@ -532,7 +542,13 @@ struct BallPosition {
 struct BallIntercept {
     x: f32,
     y: f32,
-    d: f32,
+    d: Side,
+}
+enum Side {
+    Left,
+    Right,
+    Top,
+    Bottom,
 }
 
 // LEGACY "MAGIC"
