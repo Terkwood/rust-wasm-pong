@@ -50,9 +50,8 @@ const BALL_RADIUS: f32 = 8.0;
  * at starting speed. (Original used 4)
  */
 const BALL_SPEED: f32 = 4.0;
-/**
- * Accelerate as time passes.
- */
+
+// FIXME original says "accelerate as time passes"... but we don't?
 const BALL_ACCEL: f32 = 8.0;
 
 impl MainState {
@@ -248,8 +247,8 @@ impl event::EventHandler for MainState {
             ctx,
             &ggez::graphics::Text::new(
                 format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Frame {}\n", self.last_frame)
-                    + &format!("Ball x {} y {}", self.ball.x, self.ball.y),
+                    + &format!("Frame {}\n", self.last_frame as u64 % 100000)
+                    + &format!("Speed {}\n", self.ball.speed),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
@@ -505,7 +504,7 @@ impl Ball {
             dx_changed: false,
             dy_changed: false,
             footprints: vec![],
-            speed: max_x - min_x / BALL_SPEED,
+            speed: (max_x - min_x) / BALL_SPEED,
             accel: BALL_ACCEL,
             image,
         };
