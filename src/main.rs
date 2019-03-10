@@ -526,7 +526,17 @@ impl Ball {
                 Side::Right,
             );
         } else if nx > 0.0 {
-            unimplemented!()
+            pt = solve(
+                ball.x,
+                ball.y,
+                ball.x + nx,
+                ball.y + ny,
+                paddle.left - ball.radius,
+                paddle.top - ball.radius,
+                paddle.left - ball.radius,
+                paddle.bottom + ball.radius,
+                Side::Left,
+            )
         }
         unimplemented!()
     }
