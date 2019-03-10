@@ -18,6 +18,8 @@ use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use ggez::{event, graphics, Context, GameResult};
 
+use rand::prelude::*;
+
 struct MainState {
     score: Score,
     left_paddle: Paddle,
@@ -494,13 +496,14 @@ impl Ball {
 
     pub fn reset(&mut self, player: Option<Player>) {
         self.footprints = vec![];
+        let mut rng = rand::thread_rng();
         self.set_pos(
             match player.unwrap_or(Player::One) {
                 Player::One => self.min_x,
                 Player::Two => self.max_x,
             },
-            unimplemented!(),
-        ); // TODO Game.random(this.minY, this.maxY)
+            rng.gen_range(self.min_y, self.max_y)
+        );
 
         self.set_dir(
             match player.unwrap_or(Player::One) {
