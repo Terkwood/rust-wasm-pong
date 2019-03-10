@@ -32,6 +32,7 @@ struct MainState {
     // TODO fps: u16,
 }
 
+const BALL_IMAGE_FILE: &str = "/ball.png";
 const PADDLE_IMAGE_FILE: &str = "/paddle.png";
 const PRESS1_IMAGE_FILE: &str = "/press1.png";
 const PRESS2_IMAGE_FILE: &str = "/press2.png";
@@ -43,10 +44,10 @@ const PADDLE_HEIGHT: f32 = 60.0;
  */
 const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
-const BALL_RADIUS: f32 = 5.0;
+const BALL_RADIUS: f32 = 8.0;
 /**
- * Ball should be able to cross court horizontally in 4 seconds,
- * at starting speed.
+ * Ball should be able to cross court horizontally in this many seconds,
+ * at starting speed. (Original used 4)
  */
 const BALL_SPEED: f32 = 4.0;
 /**
@@ -71,7 +72,11 @@ impl MainState {
                 size_y,
                 true,
             ),
-            ball: Ball::new(size_x, size_y),
+            ball: Ball::new(
+                graphics::Image::new(ctx, BALL_IMAGE_FILE).unwrap(),
+                size_x,
+                size_y,
+            ),
             images: Images {
                 press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
                 press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
@@ -230,8 +235,14 @@ impl event::EventHandler for MainState {
         )
         .unwrap();
 
+        // TODO self.court.draw(ctx, self.scores);
         self.left_paddle.draw(ctx);
         self.right_paddle.draw(ctx);
+        if self.playing {
+            self.ball.draw(ctx);
+        } else {
+            // TODO self.menu.draw (ctx);
+        }
 
         graphics::draw(
             ctx,
@@ -257,6 +268,7 @@ fn main() -> GameResult {
     good_web_game::start(
         conf::Conf {
             cache: conf::Cache::List(vec![
+                BALL_IMAGE_FILE,
                 PADDLE_IMAGE_FILE,
                 PRESS1_IMAGE_FILE,
                 PRESS2_IMAGE_FILE,
@@ -470,9 +482,10 @@ struct Ball {
     bottom: f32,
     dx_changed: bool,
     dy_changed: bool,
+    image: ggez::graphics::Image,
 }
 impl Ball {
-    pub fn new(game_width: f32, game_height: f32) -> Ball {
+    pub fn new(image: ggez::graphics::Image, game_width: f32, game_height: f32) -> Ball {
         let max_x = game_width - BALL_RADIUS;
         let min_x = BALL_RADIUS;
         let ball = Ball {
@@ -494,13 +507,37 @@ impl Ball {
             footprints: vec![],
             speed: max_x - min_x / BALL_SPEED,
             accel: BALL_ACCEL,
+            image,
         };
 
         ball
     }
 
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        unimplemented!()
+    pub fn draw(&self, ctx: &mut Context) {
+        let w = self.radius * 2.0;
+        let h = w;
+
+        graphics::draw(
+            ctx,
+            &self.image,
+            graphics::DrawParam::default()
+                .dest([self.x - self.radius, self.y - self.radius])
+                .scale([w, h]),
+        )
+        .unwrap();
+        if !self.footprints.is_empty() {
+            let max = self.footprints.len();
+            // TODO ctx.strokeStyle = Pong.Colors.footprint;
+            for n in 0..max {
+                // TODO
+                //   ctx.strokeRect (
+                //     this.footprints[n].x - this.radius,
+                //     this.footprints[n].y - this.radius,
+                //     w,
+                //     h
+                //   );
+            }
+        }
     }
 
     pub fn reset(&mut self, player: Option<Player>) {

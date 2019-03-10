@@ -6,53 +6,6 @@ use stdweb::web::html_element::CanvasElement;
 
 use stdweb::web::{document, window, CanvasRenderingContext2d};
 
-// From webplatform's TodoMVC example.
-#[macro_export]
-macro_rules! enclose_mut {
-    ( ($( $x:ident ),*) $y:expr ) => {
-        {
-            $(let mut $x = $x.clone();)*
-            $y
-        }
-    };
-}
-
-#[derive(Clone)]
-pub struct Game {}
-
-impl Game {
-    /**
-    * Use the `enclose!` macro to help clone
-    * Game when it's called for keyup events. See
-    * https://github.com/koute/stdweb/blob/dff1e06086124fe79e3393a99ae8e2d424f5b2f1/examples/canvas/src/main.rs
-    *
-    * See these for info on handling key press:
-    * - https://github.com/koute/stdweb/blob/8f40599d744b77a9dc6fe532951f6e16a2eae671/src/webapi/events/keyboard.rs#L229
-    * - https://steemit.com/utopian-io/@tensor/rust-web-assembly-using-stdweb-to-build-a-client-side-application-with-rust-and-wasm
-
-    */
-    pub fn new(front_canvas_id: &str) -> Self {
-        let game = Game {};
-
-        window().add_event_listener(enclose_mut!((game) move |event: KeyDownEvent|
-            game.on_key_down(event)));
-
-        game
-    }
-
-    /**
-     * See
-     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code
-     * - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
-     */
-    fn on_key_down(&mut self, event: KeyDownEvent) {
-        match event.code().as_ref() {
-            "Digit0" => (),
-            &_ => (),
-        };
-        event.prevent_default()
-    }
-}
 
 /**
  * Tracks various information about the canvases used, stats on the game, etc.
