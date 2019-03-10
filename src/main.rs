@@ -336,7 +336,7 @@ struct Paddle {
     down: f32,
     up: f32,
     image: ggez::graphics::Image,
-    level: Option<Level>
+    level: Option<Level>,
 }
 
 impl Paddle {
@@ -415,7 +415,7 @@ impl Paddle {
         // TODO unimplemented!()
     }
 
-    pub fn set_level(&mut self, level:u32) {
+    pub fn set_level(&mut self, level: u32) {
         if self.auto {
             self.level = Some(LEVELS[level as usize])
         }
