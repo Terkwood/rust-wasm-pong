@@ -46,9 +46,7 @@ const PADDLE_WIDTH_TO_SCREEN_WIDTH: f32 = 0.025;
 const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
 
-const BALL_RADIUS_STD: f32 = 5.0;
-const _BALL_RADIUS_XL: f32 = 8.0;
-const BALL_RADIUS: f32 = BALL_RADIUS_STD;
+const BALL_RADIUS: f32 = 8.0;
 /**
  * Ball should be able to cross court horizontally in this many seconds,
  * at starting speed. (Original used 4)
@@ -419,7 +417,10 @@ impl Paddle {
             &self.image,
             graphics::DrawParam::default()
                 .dest([self.x, self.y])
-                .scale([1., 1.]),
+                .scale([
+                    self.width / self.image.width() as f32,
+                    self.height / self.image.height() as f32,
+                ]),
         )
         .unwrap()
     }
@@ -531,7 +532,10 @@ impl Ball {
             &self.image,
             graphics::DrawParam::default()
                 .dest([self.x - self.radius, self.y - self.radius])
-                .scale([w, h]),
+                .scale([
+                    w / self.image.width() as f32,
+                    h / self.image.height() as f32,
+                ]),
         )
         .unwrap();
         if !self.footprints.is_empty() {
