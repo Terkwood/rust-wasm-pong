@@ -106,7 +106,7 @@ impl MainState {
             self.right_paddle
                 .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
             self.ball.reset(None);
-            console!(log, "GET IT");
+            console!(log, "BRING IT ON");
             // TODO self.hide_cursor();
         }
     }
@@ -570,11 +570,13 @@ impl Ball {
             } else if paddle.down != 0.0 {
                 pos.dy = pos.dy * if pos.dy > 0.0 { 0.5 } else { 1.5 };
             }
-
-            self.set_pos(pos.x, pos.y);
-            self.set_dir(pos.dx, pos.dy);
-            // TODO self.footprint()
         }
+
+        self.set_pos(pos.x, pos.y);
+        self.set_dir(pos.dx, pos.dy);
+        // TODO self.footprint();
+
+        console!(log, "BALL UPDATE");
     }
 
     fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> BallPosition {
@@ -840,52 +842,6 @@ pub struct Pong {
 }
 
 impl Pong {
-    pub fn new(runner: Box<Runner>, cfg: Cfg) -> Pong {
-        let w = runner.width as u32;
-        let h = runner.height as u32;
-
-        let pong = Pong {
-            cfg: cfg,
-            runner: runner,
-            width: w,
-            height: h,
-            playing: false,
-            score: Score::new(),
-            menu: Box::new(Menu::new()),
-            court: Court::new(),
-            left_paddle: Box::new(Paddle::new()),
-            right_paddle: Box::new(Paddle::new()),
-            ball: Ball::new(),
-            sounds: Box::new(Sounds::new()),
-        };
-
-        pong
-    }
-
-
-
-    fn update(&mut self, dt: i32) {
-        self.left_paddle.update(dt, &self.ball);
-        self.right_paddle.update(dt, &self.ball);
-        if self.playing {
-            let dx = self.ball.dx;
-            let dy = self.ball.dy;
-            self.ball.update(dt, &self.left_paddle, &self.right_paddle);
-            if self.ball.dx < 0 && dx > 0 {
-                self.sounds.ping()
-            } else if self.ball.dx > 0 && dx < 0 {
-                self.sounds.pong()
-            } else if self.ball.dy * dy < 0 {
-                self.sounds.wall();
-            };
-
-            if self.ball.left > self.width as i32 {
-                self.goal(Player::One)
-            } else if self.ball.right < 0 {
-                self.goal(Player::Two)
-            }
-        }
-    }
 
     fn draw(self, ctx: &CanvasRenderingContext2d) {
         self.court.draw(ctx, self.score);
