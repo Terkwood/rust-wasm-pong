@@ -336,6 +336,7 @@ struct Paddle {
     down: f32,
     up: f32,
     image: ggez::graphics::Image,
+    level: Option<Level>
 }
 
 impl Paddle {
@@ -347,6 +348,7 @@ impl Paddle {
     ) -> Paddle {
         let mut paddle = Paddle {
             auto: false,
+            level: None,
             width: 12.0,
             height: PADDLE_HEIGHT,
             speed: 0.0,
@@ -409,12 +411,14 @@ impl Paddle {
         self.up = 1.0;
     }
 
-    pub fn set_auto(&self, on: bool, level: Option<u32>) {
+    pub fn set_auto(&mut self, on: bool, level: Option<u32>) {
         // TODO unimplemented!()
     }
 
-    pub fn set_level(&self, level: u32) {
-        unimplemented!()
+    pub fn set_level(&mut self, level:u32) {
+        if self.auto {
+            self.level = Some(LEVELS[level as usize])
+        }
     }
 
     pub fn stop_moving_down(&mut self) {
@@ -575,8 +579,6 @@ impl Ball {
         self.set_pos(pos.x, pos.y);
         self.set_dir(pos.dx, pos.dy);
         // TODO self.footprint();
-
-        console!(log, "BALL UPDATE");
     }
 
     fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> BallPosition {
@@ -701,6 +703,33 @@ enum Side {
     Bottom,
 }
 
+#[derive(Copy, Clone)]
+pub struct Level {
+    ai_reaction: f32,
+    ai_error: u32,
+}
+
+lazy_static! {
+    pub static ref LEVELS: Vec<Level> = vec! [
+        Level{ai_reaction: 0.2, ai_error: 40}, // 0:  ai is losing by 8
+        Level{ai_reaction: 0.3, ai_error: 50}, // 1:  ai is losing by 7
+        Level{ai_reaction: 0.4, ai_error: 60}, // 2:  ai is losing by 6
+        Level{ai_reaction: 0.5, ai_error: 70}, // 3:  ai is losing by 5
+        Level{ai_reaction: 0.6, ai_error: 80}, // 4:  ai is losing by 4
+        Level{ai_reaction: 0.7, ai_error: 90}, // 5:  ai is losing by 3
+        Level{ai_reaction: 0.8, ai_error: 100}, // 6:  ai is losing by 2
+        Level{ai_reaction: 0.9, ai_error: 110}, // 7:  ai is losing by 1
+        Level{ai_reaction: 1.0, ai_error: 120}, // 8:  tie
+        Level{ai_reaction: 1.1, ai_error: 130}, // 9:  ai is winning by 1
+        Level{ai_reaction: 1.2, ai_error: 140}, // 10: ai is winning by 2
+        Level{ai_reaction: 1.3, ai_error: 150}, // 11: ai is winning by 3
+        Level{ai_reaction: 1.4, ai_error: 160}, // 12: ai is winning by 4
+        Level{ai_reaction: 1.5, ai_error: 170}, // 13: ai is winning by 5
+        Level{ai_reaction: 1.6, ai_error: 180}, // 14: ai is winning by 6
+        Level{ai_reaction: 1.7, ai_error: 190}, // 15: ai is winning by 7
+        Level{ai_reaction: 1.8, ai_error: 200}, // 16: ai is winning by 8
+    ];
+}
 // LEGACY "MAGIC"
 
 //mod game;
@@ -772,40 +801,6 @@ impl Default for Colors {
     }
 }
 
-lazy_static! {
-    pub static ref IMAGES: Vec<String> = vec![
-        "images/press1.png".to_owned(),
-        "images/press2.png".to_owned(),
-        "images/winner.png".to_owned(),
-    ];
-}
-
-pub struct Level {
-    ai_reaction: f32,
-    ai_error: u32,
-}
-
-lazy_static! {
-    pub static ref LEVELS: Vec<Level> = vec! [
-        Level{ai_reaction: 0.2, ai_error: 40}, // 0:  ai is losing by 8
-        Level{ai_reaction: 0.3, ai_error: 50}, // 1:  ai is losing by 7
-        Level{ai_reaction: 0.4, ai_error: 60}, // 2:  ai is losing by 6
-        Level{ai_reaction: 0.5, ai_error: 70}, // 3:  ai is losing by 5
-        Level{ai_reaction: 0.6, ai_error: 80}, // 4:  ai is losing by 4
-        Level{ai_reaction: 0.7, ai_error: 90}, // 5:  ai is losing by 3
-        Level{ai_reaction: 0.8, ai_error: 100}, // 6:  ai is losing by 2
-        Level{ai_reaction: 0.9, ai_error: 110}, // 7:  ai is losing by 1
-        Level{ai_reaction: 1.0, ai_error: 120}, // 8:  tie
-        Level{ai_reaction: 1.1, ai_error: 130}, // 9:  ai is winning by 1
-        Level{ai_reaction: 1.2, ai_error: 140}, // 10: ai is winning by 2
-        Level{ai_reaction: 1.3, ai_error: 150}, // 11: ai is winning by 3
-        Level{ai_reaction: 1.4, ai_error: 160}, // 12: ai is winning by 4
-        Level{ai_reaction: 1.5, ai_error: 170}, // 13: ai is winning by 5
-        Level{ai_reaction: 1.6, ai_error: 180}, // 14: ai is winning by 6
-        Level{ai_reaction: 1.7, ai_error: 190}, // 15: ai is winning by 7
-        Level{ai_reaction: 1.8, ai_error: 200}, // 16: ai is winning by 8
-    ];
-}
 
 #[derive(Clone)]
 pub struct Cfg {
