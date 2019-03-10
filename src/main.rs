@@ -18,12 +18,16 @@ use stdweb::web::{document, window, CanvasRenderingContext2d};
 
 use ggez::{event, graphics, Context, GameResult};
 
+use rand::prelude::*;
+
 struct MainState {
     score: Score,
     left_paddle: Paddle,
     right_paddle: Paddle,
+    ball: Ball,
     images: Images,
     last_frame: f64,
+    playing: bool,
     // TODO interval: f32,
     // TODO fps: u16,
 }
@@ -39,11 +43,21 @@ const PADDLE_HEIGHT: f32 = 60.0;
  */
 const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
+const BALL_RADIUS: f32 = 5.0;
+/**
+ * Ball should be able to cross court horizontally in 4 seconds,
+ * at starting speed.
+ */
+const BALL_SPEED: f32 = 4.0;
+/**
+ * Accelerate as time passes.
+ */
+const BALL_ACCEL: f32 = 8.0;
 
 impl MainState {
     fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
-        MainState {
+        let mut state = MainState {
             score: Score::new(),
             left_paddle: Paddle::new(
                 graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(),
@@ -57,13 +71,77 @@ impl MainState {
                 size_y,
                 true,
             ),
+            ball: Ball::new(size_x, size_y),
             images: Images {
                 press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
                 press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
                 winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
             },
+            playing: false,
             last_frame: timestamp(),
+        };
+
+        state.start_double_player();
+        state
+    }
+
+    fn start_demo(&mut self) {
+        self.start(0)
+    }
+
+    fn start_single_player(&mut self) {
+        self.start(1)
+    }
+
+    fn start_double_player(&mut self) {
+        self.start(2)
+    }
+
+    fn start(&mut self, num_players: u32) {
+        if (!self.playing) {
+            self.score = Score::new();
+            self.playing = true;
+            self.left_paddle
+                .set_auto(num_players < 1, Some(level(self.score, Player::One)));
+            self.right_paddle
+                .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
+            self.ball.reset(None);
+            console!(log, "BRING IT ON");
+            // TODO self.hide_cursor();
         }
+    }
+
+    // TODO
+    // fn stop(&mut self, ask: bool) {
+    //     if self.playing && (!ask || self.alert("Abandon game in progress?")) {
+    //         self.playing = false;
+    //         self.left_paddle.set_auto(false, None);
+    //         self.right_paddle.set_auto(false, None);
+    //         // TODO self.show_cursor();
+    //     }
+    // }
+
+    fn goal(&mut self, player: Player) {
+        console!(log, format!("🥅 {:?} GOAL 🥅", player));
+        // TODO self.sounds.goal();
+        self.score.incr(player);
+        if self.score.of(player) == 9 {
+            // TODO self.menu.declare_winner(player);
+            // TODO self.stop(false);
+            console!(log, "MEGA WINNER");
+        } else {
+            self.ball.reset(Some(player));
+            self.left_paddle.set_level(level(self.score, Player::One));
+            self.right_paddle.set_level(level(self.score, Player::Two));
+        }
+    }
+
+    fn hide_cursor(&self) {
+        unimplemented!()
+    }
+
+    fn show_cursor(&self) {
+        unimplemented!()
     }
 }
 
@@ -76,11 +154,28 @@ fn canvas_size(ctx: &Context) -> (f32, f32) {
     (x as f32, y as f32)
 }
 impl event::EventHandler for MainState {
-    fn update(&mut self, _: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         let start = timestamp();
-        let dt_seconds = (start - self.last_frame) as f32 / 1000.0;
-        self.left_paddle.update(dt_seconds);
-        self.right_paddle.update(dt_seconds);
+        let dt_secs = (start - self.last_frame) as f32 / 1000.0;
+        self.left_paddle.update(dt_secs);
+        self.right_paddle.update(dt_secs);
+        if self.playing {
+            let dx = self.ball.dx;
+            let dy = self.ball.dy;
+            self.ball
+                .update(dt_secs, &self.left_paddle, &self.right_paddle);
+            // TODO sounds
+            /*  if (self.ball.dx < 0 && dx > 0) self.sounds.ping ();
+            else if (self. ball.dx > 0 && dx < 0) self. sounds.pong ();
+            else if (self. ball.dy * dy < 0) self. sounds.wall (); */
+
+            let (game_width, _) = canvas_size(ctx);
+            if self.ball.left > game_width {
+                self.goal(Player::One)
+            } else if self.ball.right < 0.0 {
+                self.goal(Player::Two)
+            }
+        }
 
         // TODO differs from js impl, which assigns last_frame after drawing
         self.last_frame = start;
@@ -143,11 +238,10 @@ impl event::EventHandler for MainState {
             &ggez::graphics::Text::new(
                 format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Frame {}\n", self.last_frame)
-                    + &format!("Left  {:?}\n", (self.left_paddle.x, self.left_paddle.y))
-                    + &format!("Right  {:?}\n", (self.right_paddle.x, self.right_paddle.y)),
+                    + &format!("Ball x {} y {}", self.ball.x, self.ball.y),
             ),
             graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.75, size_y as f32 * 0.90])
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
                 .scale([1.5, 1.5]),
         )
         .unwrap();
@@ -203,15 +297,15 @@ impl Score {
         }
     }
 
-    /*pub fn incr(mut self, player: Player) {
+    pub fn incr(mut self, player: Player) {
         match player {
             Player::One => self.0 = self.0 + 1,
             Player::Two => self.1 = self.1 + 1,
         }
-    }*/
+    }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 enum Player {
     One,
     Two,
@@ -242,6 +336,7 @@ struct Paddle {
     down: f32,
     up: f32,
     image: ggez::graphics::Image,
+    level: Option<Level>,
 }
 
 impl Paddle {
@@ -253,6 +348,7 @@ impl Paddle {
     ) -> Paddle {
         let mut paddle = Paddle {
             auto: false,
+            level: None,
             width: 12.0,
             height: PADDLE_HEIGHT,
             speed: 0.0,
@@ -315,12 +411,14 @@ impl Paddle {
         self.up = 1.0;
     }
 
-    pub fn set_auto(&self, on: bool, level: Option<u32>) {
-        unimplemented!()
+    pub fn set_auto(&mut self, on: bool, level: Option<u32>) {
+        // TODO unimplemented!()
     }
 
-    pub fn set_level(&self, level: u32) {
-        unimplemented!()
+    pub fn set_level(&mut self, level: u32) {
+        if self.auto {
+            self.level = Some(LEVELS[level as usize])
+        }
     }
 
     pub fn stop_moving_down(&mut self) {
@@ -352,6 +450,286 @@ impl Paddle {
     }
 }
 
+#[derive(Clone)]
+struct Ball {
+    x: f32,
+    y: f32,
+    dx: f32,
+    dy: f32,
+    footprints: Vec<bool>,
+    min_x: f32,
+    max_x: f32,
+    min_y: f32,
+    max_y: f32,
+    radius: f32,
+    speed: f32,
+    accel: f32,
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
+    dx_changed: bool,
+    dy_changed: bool,
+}
+impl Ball {
+    pub fn new(game_width: f32, game_height: f32) -> Ball {
+        let max_x = game_width - BALL_RADIUS;
+        let min_x = BALL_RADIUS;
+        let ball = Ball {
+            radius: BALL_RADIUS,
+            min_x,
+            max_x,
+            min_y: WALL_WIDTH + BALL_RADIUS,
+            max_y: game_height - WALL_WIDTH - BALL_RADIUS,
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            bottom: 0.0,
+            x: 0.0,
+            y: 0.0,
+            dx: 0.0,
+            dy: 0.0,
+            dx_changed: false,
+            dy_changed: false,
+            footprints: vec![],
+            speed: max_x - min_x / BALL_SPEED,
+            accel: BALL_ACCEL,
+        };
+
+        ball
+    }
+
+    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+        unimplemented!()
+    }
+
+    pub fn reset(&mut self, player: Option<Player>) {
+        self.footprints = vec![];
+        let mut rng = rand::thread_rng();
+        self.set_pos(
+            match player.unwrap_or(Player::One) {
+                Player::One => self.min_x,
+                Player::Two => self.max_x,
+            },
+            rng.gen_range(self.min_y, self.max_y),
+        );
+
+        self.set_dir(
+            match player.unwrap_or(Player::One) {
+                Player::One => self.speed,
+                Player::Two => -self.speed,
+            },
+            self.speed,
+        )
+    }
+
+    fn set_pos(&mut self, x: f32, y: f32) {
+        self.x = x;
+        self.y = y;
+        self.left = x - self.radius;
+        self.top = y - self.radius;
+        self.right = x + self.radius;
+        self.bottom = y + self.radius;
+    }
+
+    fn set_dir(&mut self, dx: f32, dy: f32) {
+        self.dx_changed = (self.dx < 0.0) != (dx < 0.0); // did horizontal direction change
+        self.dy_changed = (self.dy < 0.0) != (dy < 0.0); // did vertical direction change
+        self.dx = dx;
+        self.dy = dy;
+    }
+
+    pub fn update(&mut self, dt: f32, left_paddle: &Paddle, right_paddle: &Paddle) {
+        let mut pos = Ball::accelerate(self.x, self.y, self.dx, self.dy, self.accel, dt);
+
+        if pos.dy > 0.0 && pos.y > self.max_y {
+            pos.y = self.max_y;
+            pos.dy = -pos.dy;
+        } else if pos.dy < 0.0 && pos.y < self.min_y {
+            pos.y = self.min_y;
+            pos.dy = -pos.dy;
+        }
+
+        let paddle = if pos.dx < 0.0 {
+            left_paddle
+        } else {
+            right_paddle
+        };
+
+        if let Some(pt) = Ball::intercept(self, paddle, pos.nx, pos.ny) {
+            match pt.d {
+                Side::Left | Side::Right => {
+                    pos.x = pt.x;
+                    pos.dx = -pos.dx;
+                }
+                Side::Top | Side::Bottom => {
+                    pos.y = pt.y;
+                    pos.dy = -pos.dy
+                }
+            }
+
+            // add/remove spin based on paddle direction
+            if paddle.up != 0.0 {
+                pos.dy = pos.dy * if pos.dy < 0.0 { 0.5 } else { 1.5 };
+            } else if paddle.down != 0.0 {
+                pos.dy = pos.dy * if pos.dy > 0.0 { 0.5 } else { 1.5 };
+            }
+        }
+
+        self.set_pos(pos.x, pos.y);
+        self.set_dir(pos.dx, pos.dy);
+        // TODO self.footprint();
+    }
+
+    fn accelerate(x: f32, y: f32, dx: f32, dy: f32, accel: f32, dt_secs: f32) -> BallPosition {
+        let x2 = x + dt_secs * dx + accel * dt_secs * dt_secs * 0.5;
+        let y2 = y + dt_secs * dy + accel * dt_secs * dt_secs * 0.5;
+        let dx2 = dx + accel * dt_secs * if dx > 0.0 { 1.0 } else { -1.0 };
+        let dy2 = dy + accel * dt_secs * if dy > 0.0 { 1.0 } else { -1.0 };
+        BallPosition {
+            nx: x2 - x,
+            ny: y2 - y,
+            x: x2,
+            y: y2,
+            dx: dx2,
+            dy: dy2,
+        }
+    }
+
+    fn intercept(ball: &Ball, paddle: &Paddle, nx: f32, ny: f32) -> Option<BallIntercept> {
+        fn solve(
+            x1: f32,
+            y1: f32,
+            x2: f32,
+            y2: f32,
+            x3: f32,
+            y3: f32,
+            x4: f32,
+            y4: f32,
+            d: Side,
+        ) -> Option<BallIntercept> {
+            let denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+            if denom != 0.0 {
+                let ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+                if ua >= 0.0 && ua <= 1.0 {
+                    let ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+                    if ub >= 0.0 && ub <= 1.0 {
+                        let x = x1 + ua * (x2 - x1);
+                        let y = y1 + ua * (y2 - y1);
+                        return Some(BallIntercept { x, y, d });
+                    }
+                }
+            }
+
+            None
+        }
+
+        let mut pt = None;
+
+        if nx < 0.0 {
+            pt = solve(
+                ball.x,
+                ball.y,
+                ball.x + nx,
+                ball.y + ny,
+                paddle.right + ball.radius,
+                paddle.top - ball.radius,
+                paddle.right + ball.radius,
+                paddle.bottom + ball.radius,
+                Side::Right,
+            );
+        } else if nx > 0.0 {
+            pt = solve(
+                ball.x,
+                ball.y,
+                ball.x + nx,
+                ball.y + ny,
+                paddle.left - ball.radius,
+                paddle.top - ball.radius,
+                paddle.left - ball.radius,
+                paddle.bottom + ball.radius,
+                Side::Left,
+            )
+        }
+
+        if pt.is_none() {
+            if ny < 0.0 {
+                pt = solve(
+                    ball.x,
+                    ball.y,
+                    ball.x + nx,
+                    ball.y + ny,
+                    paddle.left - ball.radius,
+                    paddle.bottom + ball.radius,
+                    paddle.right + ball.radius,
+                    paddle.bottom + ball.radius,
+                    Side::Bottom,
+                );
+            } else if ny > 0.0 {
+                pt = solve(
+                    ball.x,
+                    ball.y,
+                    ball.x + nx,
+                    ball.y + ny,
+                    paddle.left - ball.radius,
+                    paddle.top - ball.radius,
+                    paddle.right + ball.radius,
+                    paddle.top - ball.radius,
+                    Side::Top,
+                );
+            }
+        }
+
+        pt
+    }
+}
+struct BallPosition {
+    nx: f32,
+    ny: f32,
+    x: f32,
+    y: f32,
+    dx: f32,
+    dy: f32,
+}
+struct BallIntercept {
+    x: f32,
+    y: f32,
+    d: Side,
+}
+enum Side {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+#[derive(Copy, Clone)]
+pub struct Level {
+    ai_reaction: f32,
+    ai_error: u32,
+}
+
+lazy_static! {
+    pub static ref LEVELS: Vec<Level> = vec! [
+        Level{ai_reaction: 0.2, ai_error: 40}, // 0:  ai is losing by 8
+        Level{ai_reaction: 0.3, ai_error: 50}, // 1:  ai is losing by 7
+        Level{ai_reaction: 0.4, ai_error: 60}, // 2:  ai is losing by 6
+        Level{ai_reaction: 0.5, ai_error: 70}, // 3:  ai is losing by 5
+        Level{ai_reaction: 0.6, ai_error: 80}, // 4:  ai is losing by 4
+        Level{ai_reaction: 0.7, ai_error: 90}, // 5:  ai is losing by 3
+        Level{ai_reaction: 0.8, ai_error: 100}, // 6:  ai is losing by 2
+        Level{ai_reaction: 0.9, ai_error: 110}, // 7:  ai is losing by 1
+        Level{ai_reaction: 1.0, ai_error: 120}, // 8:  tie
+        Level{ai_reaction: 1.1, ai_error: 130}, // 9:  ai is winning by 1
+        Level{ai_reaction: 1.2, ai_error: 140}, // 10: ai is winning by 2
+        Level{ai_reaction: 1.3, ai_error: 150}, // 11: ai is winning by 3
+        Level{ai_reaction: 1.4, ai_error: 160}, // 12: ai is winning by 4
+        Level{ai_reaction: 1.5, ai_error: 170}, // 13: ai is winning by 5
+        Level{ai_reaction: 1.6, ai_error: 180}, // 14: ai is winning by 6
+        Level{ai_reaction: 1.7, ai_error: 190}, // 15: ai is winning by 7
+        Level{ai_reaction: 1.8, ai_error: 200}, // 16: ai is winning by 8
+    ];
+}
 // LEGACY "MAGIC"
 
 //mod game;
@@ -423,40 +801,6 @@ impl Default for Colors {
     }
 }
 
-lazy_static! {
-    pub static ref IMAGES: Vec<String> = vec![
-        "images/press1.png".to_owned(),
-        "images/press2.png".to_owned(),
-        "images/winner.png".to_owned(),
-    ];
-}
-
-pub struct Level {
-    ai_reaction: f32,
-    ai_error: u32,
-}
-
-lazy_static! {
-    pub static ref LEVELS: Vec<Level> = vec! [
-        Level{ai_reaction: 0.2, ai_error: 40}, // 0:  ai is losing by 8
-        Level{ai_reaction: 0.3, ai_error: 50}, // 1:  ai is losing by 7
-        Level{ai_reaction: 0.4, ai_error: 60}, // 2:  ai is losing by 6
-        Level{ai_reaction: 0.5, ai_error: 70}, // 3:  ai is losing by 5
-        Level{ai_reaction: 0.6, ai_error: 80}, // 4:  ai is losing by 4
-        Level{ai_reaction: 0.7, ai_error: 90}, // 5:  ai is losing by 3
-        Level{ai_reaction: 0.8, ai_error: 100}, // 6:  ai is losing by 2
-        Level{ai_reaction: 0.9, ai_error: 110}, // 7:  ai is losing by 1
-        Level{ai_reaction: 1.0, ai_error: 120}, // 8:  tie
-        Level{ai_reaction: 1.1, ai_error: 130}, // 9:  ai is winning by 1
-        Level{ai_reaction: 1.2, ai_error: 140}, // 10: ai is winning by 2
-        Level{ai_reaction: 1.3, ai_error: 150}, // 11: ai is winning by 3
-        Level{ai_reaction: 1.4, ai_error: 160}, // 12: ai is winning by 4
-        Level{ai_reaction: 1.5, ai_error: 170}, // 13: ai is winning by 5
-        Level{ai_reaction: 1.6, ai_error: 180}, // 14: ai is winning by 6
-        Level{ai_reaction: 1.7, ai_error: 190}, // 15: ai is winning by 7
-        Level{ai_reaction: 1.8, ai_error: 200}, // 16: ai is winning by 8
-    ];
-}
 
 #[derive(Clone)]
 pub struct Cfg {
@@ -493,96 +837,6 @@ pub struct Pong {
 }
 
 impl Pong {
-    pub fn new(runner: Box<Runner>, cfg: Cfg) -> Pong {
-        let w = runner.width as u32;
-        let h = runner.height as u32;
-
-        let pong = Pong {
-            cfg: cfg,
-            runner: runner,
-            width: w,
-            height: h,
-            playing: false,
-            score: Score::new(),
-            menu: Box::new(Menu::new()),
-            court: Court::new(),
-            left_paddle: Box::new(Paddle::new()),
-            right_paddle: Box::new(Paddle::new()),
-            ball: Ball::new(),
-            sounds: Box::new(Sounds::new()),
-        };
-
-        pong
-    }
-
-    fn start_demo(&mut self) {
-        self.start(0)
-    }
-
-    fn start_single_player(&mut self) {
-        self.start(1)
-    }
-
-    fn start_double_player(&mut self) {
-        self.start(2)
-    }
-
-    fn start(&mut self, num_players: u32) {
-        if (!self.playing) {
-            self.score = Score::new();
-            self.playing = true;
-            self.left_paddle.set_auto(num_players < 1, unimplemented!());
-            self.right_paddle
-                .set_auto(num_players < 2, unimplemented!());
-            self.ball.reset(None);
-            self.runner.hide_cursor();
-        }
-    }
-
-    fn stop(&mut self, ask: bool) {
-        if self.playing && (!ask || self.runner.confirm("Abandon game in progress?")) {
-            self.playing = false;
-            self.left_paddle.set_auto(false, None);
-            self.right_paddle.set_auto(false, None);
-            self.runner.show_cursor();
-        }
-    }
-
-    fn goal(&mut self, player: Player) {
-        self.sounds.goal();
-        self.score.incr(player);
-        if self.score.of(player) == 9 {
-            self.menu.declare_winner(player);
-            self.stop(false);
-        } else {
-            self.ball.reset(Some(player));
-            self.left_paddle.set_level(level(self.score, Player::One));
-            self.right_paddle.set_level(level(self.score, Player::Two));
-        }
-    }
-
-    fn update(&mut self, dt: i32) {
-        self.left_paddle.update(dt, &self.ball);
-        self.right_paddle.update(dt, &self.ball);
-        if self.playing {
-            let dx = self.ball.dx;
-            let dy = self.ball.dy;
-            self.ball.update(dt, &self.left_paddle, &self.right_paddle);
-            if self.ball.dx < 0 && dx > 0 {
-                self.sounds.ping()
-            } else if self.ball.dx > 0 && dx < 0 {
-                self.sounds.pong()
-            } else if self.ball.dy * dy < 0 {
-                self.sounds.wall();
-            };
-
-            if self.ball.left > self.width as i32 {
-                self.goal(Player::One)
-            } else if self.ball.right < 0 {
-                self.goal(Player::Two)
-            }
-        }
-    }
 
     fn draw(self, ctx: &CanvasRenderingContext2d) {
         self.court.draw(ctx, self.score);
@@ -682,43 +936,4 @@ impl Court {
     }
 }
 
-//=============================================================================
-// PADDLE
-//=============================================================================
-
-
-//=============================================================================
-// BALL
-//=============================================================================
-
-#[derive(Clone)]
-struct Ball {
-    left: i32,
-    right: i32,
-    dx: i32,
-    dy: i32,
-    footprints: Vec<bool>,
-}
-impl Ball {
-    pub fn new() -> Ball {
-        // TODO punted
-        Ball {
-            left: 0,
-            right: 0,
-            dx: 0,
-            dy: 0,
-            footprints: vec![],
-        }
-    }
-
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        unimplemented!()
-    }
-
-    pub fn reset(&self, player: Option<Player>) {
-        unimplemented!()
-    }
-
-    pub fn update(&self, dt: i32, left: &Paddle, right: &Paddle) {}
-}
 */
