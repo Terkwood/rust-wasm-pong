@@ -22,8 +22,10 @@ struct MainState {
     score: Score,
     left_paddle: Paddle,
     right_paddle: Paddle,
+    ball: Ball,
     images: Images,
     last_frame: f64,
+    playing: bool,
     // TODO interval: f32,
     // TODO fps: u16,
 }
@@ -67,13 +69,20 @@ impl MainState {
                 size_y,
                 true,
             ),
+            ball: Ball::new(size_x, size_y),
             images: Images {
                 press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
                 press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
                 winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
             },
+            playing: true,
             last_frame: timestamp(),
         }
+    }
+
+    fn goal(&mut self, player: Player) {
+        console!(log, "🥅 GOAL 🥅")
+        // TODO
     }
 }
 
@@ -86,11 +95,28 @@ fn canvas_size(ctx: &Context) -> (f32, f32) {
     (x as f32, y as f32)
 }
 impl event::EventHandler for MainState {
-    fn update(&mut self, _: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         let start = timestamp();
-        let dt_seconds = (start - self.last_frame) as f32 / 1000.0;
-        self.left_paddle.update(dt_seconds);
-        self.right_paddle.update(dt_seconds);
+        let dt_secs = (start - self.last_frame) as f32 / 1000.0;
+        self.left_paddle.update(dt_secs);
+        self.right_paddle.update(dt_secs);
+        if self.playing {
+            let dx = self.ball.dx;
+            let dy = self.ball.dy;
+            self.ball
+                .update(dt_secs, &self.left_paddle, &self.right_paddle);
+            // TODO sounds
+            /*  if (self.ball.dx < 0 && dx > 0) self.sounds.ping ();
+            else if (self. ball.dx > 0 && dx < 0) self. sounds.pong ();
+            else if (self. ball.dy * dy < 0) self. sounds.wall (); */
+
+            let (game_width, _) = canvas_size(ctx);
+            if self.ball.left > game_width {
+                self.goal(Player::One)
+            } else if self.ball.right < 0.0 {
+                self.goal(Player::Two)
+            }
+        }
 
         // TODO differs from js impl, which assigns last_frame after drawing
         self.last_frame = start;
@@ -381,15 +407,15 @@ struct Ball {
     dy_changed: bool,
 }
 impl Ball {
-    pub fn new(game_width: u32, game_height: u32) -> Ball {
-        let max_x = game_width as f32 - BALL_RADIUS;
+    pub fn new(game_width: f32, game_height: f32) -> Ball {
+        let max_x = game_width - BALL_RADIUS;
         let min_x = BALL_RADIUS;
         let ball = Ball {
             radius: BALL_RADIUS,
             min_x,
             max_x,
             min_y: WALL_WIDTH + BALL_RADIUS,
-            max_y: game_height as f32 - WALL_WIDTH - BALL_RADIUS,
+            max_y: game_height - WALL_WIDTH - BALL_RADIUS,
             left: 0.0,
             right: 0.0,
             top: 0.0,
