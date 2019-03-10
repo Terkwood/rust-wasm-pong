@@ -38,13 +38,17 @@ const PRESS1_IMAGE_FILE: &str = "/press1.png";
 const PRESS2_IMAGE_FILE: &str = "/press2.png";
 const WINNER_IMAGE_FILE: &str = "/winner.png";
 
-const PADDLE_HEIGHT: f32 = 60.0;
+const PADDLE_HEIGHT_TO_SCREEN_HEIGHT: f32 = 0.125;
+const PADDLE_WIDTH_TO_SCREEN_WIDTH: f32 = 0.025;
 /**
  * Paddle should be able to cross court vertically in 2 seconds
  */
 const PADDLE_SPEED: f32 = 2.0;
 const WALL_WIDTH: f32 = 12.0;
-const BALL_RADIUS: f32 = 8.0;
+
+const BALL_RADIUS_STD: f32 = 5.0;
+const _BALL_RADIUS_XL: f32 = 8.0;
+const BALL_RADIUS: f32 = BALL_RADIUS_STD;
 /**
  * Ball should be able to cross court horizontally in this many seconds,
  * at starting speed. (Original used 4)
@@ -357,14 +361,15 @@ impl Paddle {
         canvas_height: f32,
         rhs: bool,
     ) -> Paddle {
+        let paddle_height = canvas_height * PADDLE_HEIGHT_TO_SCREEN_HEIGHT;
         let mut paddle = Paddle {
             auto: false,
             level: None,
-            width: 12.0,
-            height: PADDLE_HEIGHT,
+            width: canvas_width * PADDLE_WIDTH_TO_SCREEN_WIDTH,
+            height: paddle_height,
             speed: 0.0,
             min_y: WALL_WIDTH,
-            max_y: canvas_height - WALL_WIDTH - PADDLE_HEIGHT,
+            max_y: canvas_height - WALL_WIDTH - paddle_height,
             bottom: 0.0,
             left: 0.0,
             right: 0.0,
