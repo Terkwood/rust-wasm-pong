@@ -57,7 +57,7 @@ const BALL_ACCEL: f32 = 8.0;
 impl MainState {
     fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
-        MainState {
+        let mut state = MainState {
             score: Score::new(),
             left_paddle: Paddle::new(
                 graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(),
@@ -77,11 +77,13 @@ impl MainState {
                 press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
                 winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
             },
-            playing: true,
+            playing: false,
             last_frame: timestamp(),
-        }
-    }
+        };
 
+        state.start_double_player();
+        state
+    }
 
     fn start_demo(&mut self) {
         self.start(0)
@@ -99,10 +101,12 @@ impl MainState {
         if (!self.playing) {
             self.score = Score::new();
             self.playing = true;
-            self.left_paddle.set_auto(num_players < 1, unimplemented!());
+            self.left_paddle
+                .set_auto(num_players < 1, Some(level(self.score, Player::One)));
             self.right_paddle
-                .set_auto(num_players < 2, unimplemented!());
+                .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
             self.ball.reset(None);
+            console!(log, "GET IT");
             // TODO self.hide_cursor();
         }
     }
@@ -139,7 +143,6 @@ impl MainState {
     fn show_cursor(&self) {
         unimplemented!()
     }
-
 }
 
 fn timestamp() -> f64 {
@@ -233,7 +236,9 @@ impl event::EventHandler for MainState {
         graphics::draw(
             ctx,
             &ggez::graphics::Text::new(
-                format!("Res {} x {}\n", size_x, size_y) + &format!("Frame {}\n", self.last_frame) + &format!("Ball x {} y {}", self.ball.x, self.ball.y),
+                format!("Res {} x {}\n", size_x, size_y)
+                    + &format!("Frame {}\n", self.last_frame)
+                    + &format!("Ball x {} y {}", self.ball.x, self.ball.y),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
@@ -405,7 +410,7 @@ impl Paddle {
     }
 
     pub fn set_auto(&self, on: bool, level: Option<u32>) {
-        unimplemented!()
+        // TODO unimplemented!()
     }
 
     pub fn set_level(&self, level: u32) {
@@ -502,7 +507,7 @@ impl Ball {
                 Player::One => self.min_x,
                 Player::Two => self.max_x,
             },
-            rng.gen_range(self.min_y, self.max_y)
+            rng.gen_range(self.min_y, self.max_y),
         );
 
         self.set_dir(
