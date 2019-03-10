@@ -483,7 +483,7 @@ impl Ball {
         }
     }
 
-    fn intercept(ball: &Ball, paddle: &Paddle, nx: f32, ny: f32) {
+    fn intercept(ball: &Ball, paddle: &Paddle, nx: f32, ny: f32) -> Option<BallIntercept> {
         fn solve(
             x1: f32,
             y1: f32,
@@ -538,7 +538,36 @@ impl Ball {
                 Side::Left,
             )
         }
-        unimplemented!()
+
+        if pt.is_none() {
+            if ny < 0.0 {
+                pt = solve(
+                    ball.x,
+                    ball.y,
+                    ball.x + nx,
+                    ball.y + ny,
+                    paddle.left - ball.radius,
+                    paddle.bottom + ball.radius,
+                    paddle.right + ball.radius,
+                    paddle.bottom + ball.radius,
+                    Side::Bottom,
+                );
+            } else if ny > 0.0 {
+                pt = solve(
+                    ball.x,
+                    ball.y,
+                    ball.x + nx,
+                    ball.y + ny,
+                    paddle.left - ball.radius,
+                    paddle.top - ball.radius,
+                    paddle.right + ball.radius,
+                    paddle.top - ball.radius,
+                    Side::Top,
+                );
+            }
+        }
+
+        pt
     }
 }
 struct BallPosition {
