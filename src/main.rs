@@ -81,7 +81,7 @@ impl MainState {
     }
 
     fn goal(&mut self, player: Player) {
-        console!(log, "🥅 GOAL 🥅")
+        console!(log, format!("🥅 {:?} GOAL 🥅", player))
         // TODO
     }
 }
@@ -244,7 +244,7 @@ impl Score {
     }*/
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 enum Player {
     One,
     Two,
