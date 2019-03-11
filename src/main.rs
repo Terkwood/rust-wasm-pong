@@ -85,7 +85,7 @@ impl MainState {
             last_frame: timestamp(),
         };
 
-        state.start_double_player();
+        state.start_bots();
         state
     }
 
