@@ -85,11 +85,11 @@ impl MainState {
             last_frame: timestamp(),
         };
 
-        state.start_double_player();
+        state.start_bots();
         state
     }
 
-    fn start_demo(&mut self) {
+    fn start_bots(&mut self) {
         self.start(0)
     }
 
@@ -161,8 +161,9 @@ impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         let start = timestamp();
         let dt_secs = (start - self.last_frame) as f32 / 1000.0;
-        self.left_paddle.update(dt_secs);
-        self.right_paddle.update(dt_secs);
+        let (_, game_width) = canvas_size(ctx);
+        self.left_paddle.update(dt_secs, &self.ball, game_width);
+        self.right_paddle.update(dt_secs, &self.ball, game_width);
         if self.playing {
             let dx = self.ball.dx;
             let dy = self.ball.dy;
@@ -251,8 +252,7 @@ impl event::EventHandler for MainState {
             ctx,
             &ggez::graphics::Text::new(
                 format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Frame {}\n", self.last_frame as u64 % 100000)
-                    + &format!("Accel {}\n", self.ball.accel),
+                    + &format!("Frame {}\n", self.last_frame as u64 % 100000),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
@@ -451,7 +451,13 @@ impl Paddle {
     }
 
     pub fn set_auto(&mut self, on: bool, level: Option<u32>) {
-        // TODO unimplemented!()
+        if on && !self.auto {
+            self.auto = true;
+            self.set_level(level.unwrap_or(0))
+        } else if !on && self.auto {
+            self.auto = false;
+            self.set_dir(0.0);
+        }
     }
 
     pub fn set_level(&mut self, level: u32) {
@@ -468,9 +474,9 @@ impl Paddle {
         self.up = 0.0;
     }
 
-    pub fn update(&mut self, dt_secs: f32) {
+    pub fn update(&mut self, dt_secs: f32, ball: &Ball, game_width: f32) {
         if self.auto {
-            unimplemented!();
+            self.bot(dt_secs, ball, game_width)
         }
 
         let amount: f32 = self.down - self.up;
