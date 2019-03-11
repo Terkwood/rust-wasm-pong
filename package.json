@@ -1,9 +1,0 @@
-{
-  "license": "MIT",
-  "scripts": {
-    "build": "sh build.sh"
-  },
-  "dependencies": {
-    "gh-pages": "^2.0.1"
-  }
-}
