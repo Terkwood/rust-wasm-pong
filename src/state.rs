@@ -97,7 +97,7 @@ impl MainState {
             self.right_paddle
                 .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
             self.ball.reset(None);
-            // TODO self.hide_cursor();
+            // TODO self._hide_cursor();
         }
     }
 
@@ -107,7 +107,7 @@ impl MainState {
     //         self.playing = false;
     //         self.left_paddle.set_auto(false, None);
     //         self.right_paddle.set_auto(false, None);
-    //         // TODO self.show_cursor();
+    //         // TODO self._show_cursor();
     //     }
     // }
 
@@ -208,7 +208,7 @@ impl event::EventHandler for MainState {
         graphics::clear(ctx, [0.0, 0.0, 0.0, 1.0].into());
 
         let (size_x, size_y) = canvas_size(ctx);
-        // TODO self.draw_instructions(ctx, size_x, size_y);
+        // TODO self._draw_instructions(ctx, size_x, size_y);
 
         // TODO self.court.draw(ctx, self.scores);
         self.left_paddle.draw(ctx);

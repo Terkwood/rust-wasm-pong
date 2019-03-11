@@ -240,7 +240,7 @@ impl Paddle {
             } else {
                 self.left - ball.x
             } / game_width;
-            // TODO is the unwrap_or ok ?
+
             let error = self.level.map(|l| l.ai_error).unwrap_or(0) as f32 * closeness;
             let mut rng = rand::thread_rng();
             p.y = p.y + rng.gen_range(-error, error);

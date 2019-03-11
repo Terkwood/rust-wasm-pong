@@ -19,5 +19,4 @@ pub const BALL_RADIUS: f32 = 8.0;
  */
 pub const BALL_SPEED: f32 = 4.0;
 
-// FIXME original says "accelerate as time passes"... but we don't?
 pub const BALL_ACCEL: f32 = 8.0;
