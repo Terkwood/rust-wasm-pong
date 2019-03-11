@@ -16,7 +16,15 @@ A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Co
 - [stdweb](https://github.com/koute/stdweb)
 - [wasm and rust](https://github.com/raphamorim/wasm-and-rust)
 
-## Running Locally
+## How To
+
+Build static assets:
+
+```sh
+sh build.sh
+```
+
+Run locally:
 
 ```sh
 cargo web start --release
