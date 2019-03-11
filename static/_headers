@@ -1,0 +1,6 @@
+# netlify config
+# see https://www.netlify.com/docs/headers-and-basic-auth/
+# see https://webassembly.github.io/spec/web-api/index.html#streaming-modules
+/rust-wasm-pong.wasm
+  Content-Encoding: gzip
+  Content-Type: application/wasm
