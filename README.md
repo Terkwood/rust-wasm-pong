@@ -6,7 +6,7 @@ A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Co
 
 ## Live Demo
 
-[Play the live demo](https://vibrant-banach-0ff90f.netlify.com/)
+[Play the live demo](https://pong.prawn.farm)
 
 ## Inspiration
 
