@@ -85,8 +85,33 @@ impl MainState {
             last_frame: timestamp(),
         };
 
-        state.start_bots();
+        state.start_double_player();
         state
+    }
+
+    fn draw_instructions(&mut self, ctx: &mut Context, size_x: f32, size_y: f32) {
+        graphics::draw(
+            ctx,
+            &self.images.press1,
+            graphics::DrawParam::default()
+                .dest([size_x as f32 * 0.05, size_y as f32 * 0.05])
+                .scale([1., 1.]),
+        )
+        .unwrap();
+
+        // line up the right edge with 95% of the screen's width
+        let mostly_right = size_x as f32 * 0.95;
+        graphics::draw(
+            ctx,
+            &self.images.press2,
+            graphics::DrawParam::default()
+                .dest([
+                    mostly_right - self.images.press2.width() as f32,
+                    size_y as f32 * 0.05,
+                ])
+                .scale([1., 1.]),
+        )
+        .unwrap();
     }
 
     fn start_bots(&mut self) {
@@ -215,29 +240,7 @@ impl event::EventHandler for MainState {
         graphics::clear(ctx, [0.0, 0.0, 0.0, 1.0].into());
 
         let (size_x, size_y) = canvas_size(ctx);
-
-        graphics::draw(
-            ctx,
-            &self.images.press1,
-            graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.05, size_y as f32 * 0.05])
-                .scale([1., 1.]),
-        )
-        .unwrap();
-
-        // line up the right edge with 95% of the screen's width
-        let mostly_right = size_x as f32 * 0.95;
-        graphics::draw(
-            ctx,
-            &self.images.press2,
-            graphics::DrawParam::default()
-                .dest([
-                    mostly_right - self.images.press2.width() as f32,
-                    size_y as f32 * 0.05,
-                ])
-                .scale([1., 1.]),
-        )
-        .unwrap();
+        // TODO self.draw_instructions(ctx, size_x, size_y);
 
         // TODO self.court.draw(ctx, self.scores);
         self.left_paddle.draw(ctx);
@@ -251,8 +254,9 @@ impl event::EventHandler for MainState {
         graphics::draw(
             ctx,
             &ggez::graphics::Text::new(
-                format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Frame {}\n", self.last_frame as u64 % 100000),
+                "Perma-Bot Mode 🤖\n".to_string()
+                    + &format!("Res {} x {}\n", size_x, size_y)
+                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
             ),
             graphics::DrawParam::default()
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
