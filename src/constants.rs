@@ -27,7 +27,8 @@ pub const BALL_SPEED: f32 = 4.0;
 
 pub const BALL_ACCEL: f32 = 8.0;
 
-pub const FONT: &str = "10px Orbitron";
+pub const MENU_FONT: &str = "18px Orbitron";
+pub const STATS_FONT: &str = "10px Orbitron";
 pub const TEXT_COLOR: Color = Color {
     r: 1.0,
     g: 1.0,

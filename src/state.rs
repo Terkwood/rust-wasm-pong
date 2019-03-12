@@ -24,7 +24,7 @@ impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
         let mut state = MainState {
-            menu: Menu::new(),
+            menu: Menu::new(size_x, size_y),
             score: Score::new(),
             court: Court::new(
                 graphics::Image::new(ctx, BLOCK_IMAGE_FILE).unwrap(),
@@ -241,7 +241,7 @@ impl event::EventHandler for MainState {
                 "Perma-Bot Mode 🤖\n".to_string()
                     + &format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
-                graphics::Font(FONT.to_string()),
+                graphics::Font(STATS_FONT.to_string()),
                 1.0,
             )),
             graphics::DrawParam::default()

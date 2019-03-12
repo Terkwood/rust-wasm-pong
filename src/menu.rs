@@ -1,6 +1,6 @@
 use ggez::{graphics, Context};
 
-use crate::constants::{FONT, TEXT_COLOR};
+use crate::constants::{MENU_FONT, TEXT_COLOR, BLOCK_LENGTH_TO_SCREEN_HEIGHT};
 use crate::player::Player;
 
 #[derive(Clone)]
@@ -9,7 +9,7 @@ pub struct Menu {
     //player_one_wins: TextBox,
     //player_two_wins: TextBox,
     one_player_start: TextBox,
-    // one_player_controls: TextBox,
+    one_player_controls: TextBox,
     // two_player_start: TextBox,
     // two_player_controls: TextBox,
     // zero_player_start: TextBox,
@@ -18,32 +18,43 @@ pub struct Menu {
 }
 
 impl Menu {
-    pub fn new() -> Menu {
+    pub fn new(game_width: f32, game_height: f32) -> Menu {
         Menu {
             // TODO player_one_wins: TextBox { x: 0.0, y: 0.0, msg: "🏆 WINNER! 🏆".to_string() },
             one_player_start: TextBox {
-                x: 0.0,
-                y: 0.0,
-                msg: "press '1' for\nsingle player".to_string(),
+                x: 0.05 * game_width,
+                y: 2.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
+                msg: "press '1' for\n\nsingle player".to_string(),
+            },
+            one_player_controls: TextBox {
+                x: 0.085 * game_width,
+                y: 6.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
+                msg: "'q': move up\n\n'a': move down".to_string(),
             },
             winner: None,
         }
     }
 
     pub fn draw(&self, ctx: &mut Context) {
-        graphics::draw(
-            ctx,
-            &ggez::graphics::Text::new((
-                self.one_player_start.msg.to_string(),
-                graphics::Font(FONT.to_string()),
-                1.0,
-            )),
-            graphics::DrawParam::default()
-                .color(TEXT_COLOR)
-                .dest([self.one_player_start.x, self.one_player_start.y])
-                .scale([1.5, 1.5]),
-        )
-        .unwrap();
+        for text_box in &self.menu_boxes() {
+            graphics::draw(
+                ctx,
+                &ggez::graphics::Text::new((
+                    text_box.msg.to_string(),
+                    graphics::Font(MENU_FONT.to_string()),
+                    1.0,
+                )),
+                graphics::DrawParam::default()
+                    .color(TEXT_COLOR)
+                    .dest([text_box.x, text_box.y])
+                    .scale([1.0, 1.0]),
+            )
+            .unwrap();
+        }
+    }
+
+    fn menu_boxes(&self) -> Vec<&TextBox> {
+        vec![&self.one_player_start, &self.one_player_controls]
     }
 
     pub fn declare_winner(&mut self, player: Player) {
