@@ -1,3 +1,5 @@
+use ggez::graphics::Color;
+
 pub const BALL_IMAGE_FILE: &str = "/ball.png";
 pub const BLOCK_IMAGE_FILE: &str = "/block.png";
 pub const PADDLE_IMAGE_FILE: &str = "/paddle.png";
@@ -24,3 +26,11 @@ pub const BALL_RADIUS: f32 = 8.0;
 pub const BALL_SPEED: f32 = 4.0;
 
 pub const BALL_ACCEL: f32 = 8.0;
+
+pub const FONT: &str = "10px Orbitron";
+pub const TEXT_COLOR: Color = Color {
+    r: 1.0,
+    g: 1.0,
+    b: 1.0,
+    a: 1.0,
+};

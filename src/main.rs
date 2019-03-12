@@ -12,6 +12,7 @@ mod ball;
 mod constants;
 mod court;
 mod level;
+mod menu;
 mod paddle;
 mod player;
 mod score;
@@ -166,28 +167,6 @@ impl Pong {
     }
 }
 
-
-//=============================================================================
-// MENU
-//=============================================================================
-
-#[derive(Clone)]
-struct Menu {}
-
-impl Menu {
-    pub fn new() -> Menu {
-        //TODO punted
-        Menu {}
-    }
-
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        unimplemented!()
-    }
-
-    pub fn declare_winner(&self, player: Player) {
-        unimplemented!()
-    }
-}
 
 //=============================================================================
 // SOUNDS

@@ -3,11 +3,13 @@ use ggez::{event, graphics, Context, GameResult};
 use crate::ball::Ball;
 use crate::constants::*;
 use crate::court::Court;
+use crate::menu::Menu;
 use crate::paddle::Paddle;
 use crate::player::Player;
 use crate::score::Score;
 
 pub struct MainState {
+    menu: Menu,
     score: Score,
     left_paddle: Paddle,
     right_paddle: Paddle,
@@ -22,6 +24,7 @@ impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
         let mut state = MainState {
+            menu: Menu::new(),
             score: Score::new(),
             court: Court::new(
                 graphics::Image::new(ctx, BLOCK_IMAGE_FILE).unwrap(),
@@ -227,6 +230,8 @@ impl event::EventHandler for MainState {
             // TODO self.menu.draw (ctx);
         }
 
+        self.menu.draw(ctx);
+
         let (size_x, size_y) = canvas_size(ctx);
         // TODO self._draw_instructions(ctx, size_x, size_y);
 
@@ -235,11 +240,12 @@ impl event::EventHandler for MainState {
             &ggez::graphics::Text::new((
                 "Perma-Bot Mode 🤖\n".to_string()
                     + &format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000)
-            , graphics::Font("10px Orbitron".to_string()), 1.0)
-            ),
+                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
+                graphics::Font(FONT.to_string()),
+                1.0,
+            )),
             graphics::DrawParam::default()
-                .color(graphics::Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0})
+                .color(TEXT_COLOR)
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
                 .scale([1.5, 1.5]),
         )
