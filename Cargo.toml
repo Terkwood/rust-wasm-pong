@@ -5,7 +5,7 @@ authors = ["Terkwood <metaterkhorn@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-good-web-game = { git = "https://github.com/not-fl3/good-web-game" }
+good-web-game = { git = "https://github.com/Terkwood/good-web-game", rev = "c5a873e" }
 lazy_static = "*"
 rand = { version = "0.6.5", features = ["stdweb"] }
 stdweb = "0.4.14"

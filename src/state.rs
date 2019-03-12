@@ -232,12 +232,14 @@ impl event::EventHandler for MainState {
 
         graphics::draw(
             ctx,
-            &ggez::graphics::Text::new(
+            &ggez::graphics::Text::new((
                 "Perma-Bot Mode 🤖\n".to_string()
                     + &format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
+                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000)
+            , graphics::Font("small-caps 10px Courier New".to_string()), 1.0)
             ),
             graphics::DrawParam::default()
+                .color(graphics::Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0})
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
                 .scale([1.5, 1.5]),
         )
