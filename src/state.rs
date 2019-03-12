@@ -94,14 +94,12 @@ impl MainState {
     }
 
     fn goal(&mut self, player: Player) {
-        console!(log, format!("🥅 {:?} GOAL 🥅", player));
         // TODO self.sounds.goal();
         self.score = Score::incr(self.score, player);
 
         if self.score.of(player) == 9 {
-            //self.menu.declare_winner(player);
+            self.menu.declare_winner(player);
             self.stop(false);
-            console!(log, "🏆 W I N N E R 🏆");
         } else {
             self.ball.reset(Some(player));
             self.left_paddle.set_level(level(self.score, Player::One));
