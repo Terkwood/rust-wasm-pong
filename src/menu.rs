@@ -11,11 +11,13 @@ pub struct Menu {
     one_player_controls: TextBox,
     two_player_start: TextBox,
     two_player_controls: TextBox,
+    zero_player_start: TextBox,
     winner: Option<Player>,
 }
 
 impl Menu {
     pub fn new(game_width: f32, game_height: f32) -> Menu {
+        let left_start_offset: f32 = 0.05 * game_width;
         Menu {
             player_one_wins: TextBox {
                 x: game_width * 0.18,
@@ -28,7 +30,7 @@ impl Menu {
                 msg: WINNER_MSG.to_string(),
             },
             one_player_start: TextBox {
-                x: 0.05 * game_width,
+                x: left_start_offset,
                 y: 2.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
                 msg: ONE_PLAYER_START_MSG.to_string(),
             },
@@ -46,6 +48,11 @@ impl Menu {
                 x: 0.80 * game_width,
                 y: 6.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
                 msg: TWO_PLAYER_CONTROLS_MSG.to_string(),
+            },
+            zero_player_start: TextBox {
+                x: left_start_offset,
+                y: game_height - 5.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
+                msg: ZERO_PLAYER_START_MSG.to_string(),
             },
 
             winner: None,
@@ -71,6 +78,7 @@ impl Menu {
             &self.one_player_controls,
             &self.two_player_start,
             &self.two_player_controls,
+            &self.zero_player_start,
         ]
     }
 

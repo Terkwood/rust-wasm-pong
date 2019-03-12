@@ -39,3 +39,4 @@ pub const ONE_PLAYER_START_MSG: &str = "press '1' for\n\nsingle player";
 pub const ONE_PLAYER_CONTROLS_MSG: &str = "'q': move up\n\n'a': move down";
 pub const TWO_PLAYER_START_MSG: &str = "press '2' for\n\ndouble player";
 pub const TWO_PLAYER_CONTROLS_MSG: &str = "'p': move up\n\n'l': move down";
+pub const ZERO_PLAYER_START_MSG: &str = "press '0' for\n\nbots-only 🤖";
