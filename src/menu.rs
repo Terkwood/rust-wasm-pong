@@ -1,6 +1,6 @@
 use ggez::{graphics, Context};
 
-use crate::constants::{MENU_FONT, TEXT_COLOR, BLOCK_LENGTH_TO_SCREEN_HEIGHT};
+use crate::constants::{BLOCK_LENGTH_TO_SCREEN_HEIGHT, MENU_FONT, TEXT_COLOR};
 use crate::player::Player;
 
 #[derive(Clone)]
@@ -10,8 +10,8 @@ pub struct Menu {
     //player_two_wins: TextBox,
     one_player_start: TextBox,
     one_player_controls: TextBox,
-    // two_player_start: TextBox,
-    // two_player_controls: TextBox,
+    two_player_start: TextBox,
+    two_player_controls: TextBox,
     // zero_player_start: TextBox,
     // misc_controls: TextBox,
     winner: Option<Player>,
@@ -31,6 +31,17 @@ impl Menu {
                 y: 6.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
                 msg: "'q': move up\n\n'a': move down".to_string(),
             },
+            two_player_start: TextBox {
+                x: 0.835 * game_width,
+                y: 2.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
+                msg: "press '2' for\n\ndouble player".to_string(),
+            },
+            two_player_controls: TextBox {
+                x: 0.80 * game_width,
+                y: 6.0 * BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height,
+                msg: "'p': move up\n\n'l': move down".to_string(),
+            },
+
             winner: None,
         }
     }
@@ -54,7 +65,12 @@ impl Menu {
     }
 
     fn menu_boxes(&self) -> Vec<&TextBox> {
-        vec![&self.one_player_start, &self.one_player_controls]
+        vec![
+            &self.one_player_start,
+            &self.one_player_controls,
+            &self.two_player_start,
+            &self.two_player_controls,
+        ]
     }
 
     pub fn declare_winner(&mut self, player: Player) {

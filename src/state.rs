@@ -15,7 +15,6 @@ pub struct MainState {
     right_paddle: Paddle,
     ball: Ball,
     court: Court,
-    images: Images,
     last_frame: f64,
     playing: bool,
 }
@@ -48,42 +47,12 @@ impl MainState {
                 size_x,
                 size_y,
             ),
-            images: Images {
-                press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
-                press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
-                winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
-            },
             playing: false,
             last_frame: timestamp(),
         };
 
         state.start_bots();
         state
-    }
-
-    fn _draw_instructions(&mut self, ctx: &mut Context, size_x: f32, size_y: f32) {
-        graphics::draw(
-            ctx,
-            &self.images.press1,
-            graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.05, size_y as f32 * 0.05])
-                .scale([1., 1.]),
-        )
-        .unwrap();
-
-        // line up the right edge with 95% of the screen's width
-        let mostly_right = size_x as f32 * 0.95;
-        graphics::draw(
-            ctx,
-            &self.images.press2,
-            graphics::DrawParam::default()
-                .dest([
-                    mostly_right - self.images.press2.width() as f32,
-                    size_y as f32 * 0.05,
-                ])
-                .scale([1., 1.]),
-        )
-        .unwrap();
     }
 
     fn start_bots(&mut self) {
@@ -253,10 +222,4 @@ impl event::EventHandler for MainState {
 
         graphics::present(ctx)
     }
-}
-
-pub struct Images {
-    press1: graphics::Image,
-    press2: graphics::Image,
-    winner: graphics::Image,
 }

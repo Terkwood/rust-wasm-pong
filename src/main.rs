@@ -30,14 +30,7 @@ fn main() -> GameResult {
 
     good_web_game::start(
         conf::Conf {
-            cache: conf::Cache::List(vec![
-                BALL_IMAGE_FILE,
-                PADDLE_IMAGE_FILE,
-                PRESS1_IMAGE_FILE,
-                PRESS2_IMAGE_FILE,
-                WINNER_IMAGE_FILE,
-                BLOCK_IMAGE_FILE,
-            ]),
+            cache: conf::Cache::List(vec![BALL_IMAGE_FILE, PADDLE_IMAGE_FILE, BLOCK_IMAGE_FILE]),
             ..Default::default()
         },
         |mut context| {

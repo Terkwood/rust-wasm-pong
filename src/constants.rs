@@ -3,9 +3,6 @@ use ggez::graphics::Color;
 pub const BALL_IMAGE_FILE: &str = "/ball.png";
 pub const BLOCK_IMAGE_FILE: &str = "/block.png";
 pub const PADDLE_IMAGE_FILE: &str = "/paddle.png";
-pub const PRESS1_IMAGE_FILE: &str = "/press1.png";
-pub const PRESS2_IMAGE_FILE: &str = "/press2.png";
-pub const WINNER_IMAGE_FILE: &str = "/winner.png";
 
 pub const BLOCK_LENGTH_TO_SCREEN_WIDTH: f32 = 0.025;
 pub const BLOCK_LENGTH_TO_SCREEN_HEIGHT: f32 = 0.01875;
