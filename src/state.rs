@@ -3,17 +3,18 @@ use ggez::{event, graphics, Context, GameResult};
 use crate::ball::Ball;
 use crate::constants::*;
 use crate::court::Court;
+use crate::menu::Menu;
 use crate::paddle::Paddle;
 use crate::player::Player;
 use crate::score::Score;
 
 pub struct MainState {
+    menu: Menu,
     score: Score,
     left_paddle: Paddle,
     right_paddle: Paddle,
     ball: Ball,
     court: Court,
-    images: Images,
     last_frame: f64,
     playing: bool,
 }
@@ -21,7 +22,8 @@ pub struct MainState {
 impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
-        let mut state = MainState {
+        MainState {
+            menu: Menu::new(size_x, size_y),
             score: Score::new(),
             court: Court::new(
                 graphics::Image::new(ctx, BLOCK_IMAGE_FILE).unwrap(),
@@ -45,53 +47,20 @@ impl MainState {
                 size_x,
                 size_y,
             ),
-            images: Images {
-                press1: graphics::Image::new(ctx, PRESS1_IMAGE_FILE).unwrap(),
-                press2: graphics::Image::new(ctx, PRESS2_IMAGE_FILE).unwrap(),
-                winner: graphics::Image::new(ctx, WINNER_IMAGE_FILE).unwrap(),
-            },
             playing: false,
             last_frame: timestamp(),
-        };
-
-        state.start_bots();
-        state
-    }
-
-    fn _draw_instructions(&mut self, ctx: &mut Context, size_x: f32, size_y: f32) {
-        graphics::draw(
-            ctx,
-            &self.images.press1,
-            graphics::DrawParam::default()
-                .dest([size_x as f32 * 0.05, size_y as f32 * 0.05])
-                .scale([1., 1.]),
-        )
-        .unwrap();
-
-        // line up the right edge with 95% of the screen's width
-        let mostly_right = size_x as f32 * 0.95;
-        graphics::draw(
-            ctx,
-            &self.images.press2,
-            graphics::DrawParam::default()
-                .dest([
-                    mostly_right - self.images.press2.width() as f32,
-                    size_y as f32 * 0.05,
-                ])
-                .scale([1., 1.]),
-        )
-        .unwrap();
+        }
     }
 
     fn start_bots(&mut self) {
         self.start(0)
     }
 
-    fn _start_single_player(&mut self) {
+    fn start_single_player(&mut self) {
         self.start(1)
     }
 
-    fn _start_double_player(&mut self) {
+    fn start_double_player(&mut self) {
         self.start(2)
     }
 
@@ -122,14 +91,12 @@ impl MainState {
     }
 
     fn goal(&mut self, player: Player) {
-        console!(log, format!("🥅 {:?} GOAL 🥅", player));
         // TODO self.sounds.goal();
         self.score = Score::incr(self.score, player);
 
         if self.score.of(player) == 9 {
-            //self.menu.declare_winner(player);
+            self.menu.declare_winner(player);
             self.stop(false);
-            console!(log, "🏆 W I N N E R 🏆");
         } else {
             self.ball.reset(Some(player));
             self.left_paddle.set_level(level(self.score, Player::One));
@@ -194,9 +161,9 @@ impl event::EventHandler for MainState {
     fn key_down_event(&mut self, _ctx: &mut Context, key: &str) {
         match key {
             "Escape" => console!(log, "ESC"),
-            "Digit0" => console!(log, "0"),
-            "Digit1" => console!(log, "1"),
-            "Digit2" => console!(log, "2"),
+            "Digit0" => self.start_bots(),
+            "Digit1" => self.start_single_player(),
+            "Digit2" => self.start_double_player(),
             "KeyQ" => self.left_paddle.move_up(),
             "KeyA" => self.left_paddle.move_down(),
             "KeyP" => self.right_paddle.move_up(),
@@ -224,7 +191,7 @@ impl event::EventHandler for MainState {
         if self.playing {
             self.ball.draw(ctx);
         } else {
-            // TODO self.menu.draw (ctx);
+            self.menu.draw(ctx);
         }
 
         let (size_x, size_y) = canvas_size(ctx);
@@ -233,13 +200,13 @@ impl event::EventHandler for MainState {
         graphics::draw(
             ctx,
             &ggez::graphics::Text::new((
-                "Perma-Bot Mode 🤖\n".to_string()
-                    + &format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000)
-            , graphics::Font("10px Orbitron".to_string()), 1.0)
-            ),
+                format!("Res {} x {}\n", size_x, size_y)
+                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
+                graphics::Font(STATS_FONT.to_string()),
+                1.0,
+            )),
             graphics::DrawParam::default()
-                .color(graphics::Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0})
+                .color(TEXT_COLOR)
                 .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
                 .scale([1.5, 1.5]),
         )
@@ -247,10 +214,4 @@ impl event::EventHandler for MainState {
 
         graphics::present(ctx)
     }
-}
-
-pub struct Images {
-    press1: graphics::Image,
-    press2: graphics::Image,
-    winner: graphics::Image,
 }
