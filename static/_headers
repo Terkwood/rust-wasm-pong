@@ -4,3 +4,5 @@
 /rust-wasm-pong.wasm
   Content-Encoding: gzip
   Content-Type: application/wasm
+/rust-wasm-pong.js
+  Content-Encoding: gzip
