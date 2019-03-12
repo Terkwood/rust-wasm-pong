@@ -191,7 +191,7 @@ impl event::EventHandler for MainState {
         if self.playing {
             self.ball.draw(ctx);
         } else {
-            self.menu.draw (ctx);
+            self.menu.draw(ctx);
         }
 
         let (size_x, size_y) = canvas_size(ctx);
@@ -199,7 +199,8 @@ impl event::EventHandler for MainState {
 
         graphics::draw(
             ctx,
-            &ggez::graphics::Text::new((format!("Res {} x {}\n", size_x, size_y)
+            &ggez::graphics::Text::new((
+                format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
                 graphics::Font(STATS_FONT.to_string()),
                 1.0,
