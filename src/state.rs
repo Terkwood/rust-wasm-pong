@@ -22,7 +22,7 @@ pub struct MainState {
 impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
-        let mut state = MainState {
+        MainState {
             menu: Menu::new(size_x, size_y),
             score: Score::new(),
             court: Court::new(
@@ -49,21 +49,18 @@ impl MainState {
             ),
             playing: false,
             last_frame: timestamp(),
-        };
-
-        state.start_bots();
-        state
+        }
     }
 
     fn start_bots(&mut self) {
         self.start(0)
     }
 
-    fn _start_single_player(&mut self) {
+    fn start_single_player(&mut self) {
         self.start(1)
     }
 
-    fn _start_double_player(&mut self) {
+    fn start_double_player(&mut self) {
         self.start(2)
     }
 
@@ -164,9 +161,9 @@ impl event::EventHandler for MainState {
     fn key_down_event(&mut self, _ctx: &mut Context, key: &str) {
         match key {
             "Escape" => console!(log, "ESC"),
-            "Digit0" => console!(log, "0"),
-            "Digit1" => console!(log, "1"),
-            "Digit2" => console!(log, "2"),
+            "Digit0" => self.start_bots(),
+            "Digit1" => self.start_single_player(),
+            "Digit2" => self.start_double_player(),
             "KeyQ" => self.left_paddle.move_up(),
             "KeyA" => self.left_paddle.move_down(),
             "KeyP" => self.right_paddle.move_up(),
@@ -194,19 +191,15 @@ impl event::EventHandler for MainState {
         if self.playing {
             self.ball.draw(ctx);
         } else {
-            // TODO self.menu.draw (ctx);
+            self.menu.draw (ctx);
         }
-
-        self.menu.draw(ctx);
 
         let (size_x, size_y) = canvas_size(ctx);
         // TODO self._draw_instructions(ctx, size_x, size_y);
 
         graphics::draw(
             ctx,
-            &ggez::graphics::Text::new((
-                "Perma-Bot Mode 🤖\n".to_string()
-                    + &format!("Res {} x {}\n", size_x, size_y)
+            &ggez::graphics::Text::new((format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
                 graphics::Font(STATS_FONT.to_string()),
                 1.0,
