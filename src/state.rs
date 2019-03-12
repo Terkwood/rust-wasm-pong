@@ -2,15 +2,17 @@ use ggez::{event, graphics, Context, GameResult};
 
 use crate::ball::Ball;
 use crate::constants::*;
+use crate::court::Court;
 use crate::paddle::Paddle;
 use crate::player::Player;
-use crate::Score;
+use crate::score::Score;
 
 pub struct MainState {
     score: Score,
     left_paddle: Paddle,
     right_paddle: Paddle,
     ball: Ball,
+    court: Court,
     images: Images,
     last_frame: f64,
     playing: bool,
@@ -21,6 +23,11 @@ impl MainState {
         let (size_x, size_y) = canvas_size(ctx);
         let mut state = MainState {
             score: Score::new(),
+            court: Court::new(
+                graphics::Image::new(ctx, BLOCK_IMAGE_FILE).unwrap(),
+                size_x,
+                size_y,
+            ),
             left_paddle: Paddle::new(
                 graphics::Image::new(ctx, PADDLE_IMAGE_FILE).unwrap(),
                 size_x,
@@ -101,23 +108,27 @@ impl MainState {
         }
     }
 
-    // TODO
-    // fn stop(&mut self, ask: bool) {
-    //     if self.playing && (!ask || self.alert("Abandon game in progress?")) {
-    //         self.playing = false;
-    //         self.left_paddle.set_auto(false, None);
-    //         self.right_paddle.set_auto(false, None);
-    //         // TODO self._show_cursor();
-    //     }
-    // }
+    fn stop(&mut self, ask: bool) {
+        if self.playing && (!ask || self.alert("Abandon game in progress?")) {
+            self.playing = false;
+            self.left_paddle.set_auto(false, None);
+            self.right_paddle.set_auto(false, None);
+            // TODO self._show_cursor();
+        }
+    }
+
+    fn alert(&self, msg: &str) -> bool {
+        unimplemented!()
+    }
 
     fn goal(&mut self, player: Player) {
         console!(log, format!("🥅 {:?} GOAL 🥅", player));
         // TODO self.sounds.goal();
-        self.score.incr(player);
+        self.score = Score::incr(self.score, player);
+
         if self.score.of(player) == 9 {
-            // TODO self.menu.declare_winner(player);
-            // TODO self.stop(false);
+            //self.menu.declare_winner(player);
+            self.stop(false);
             console!(log, "🏆 W I N N E R 🏆");
         } else {
             self.ball.reset(Some(player));
@@ -138,7 +149,7 @@ impl MainState {
 fn level(score: Score, player: Player) -> u32 {
     let x = score.of(player);
     let y = score.of(player.other());
-    8 + (x - y)
+    (8 + (x as i32 - y as i32)) as u32
 }
 
 fn timestamp() -> f64 {
@@ -207,10 +218,7 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, [0.0, 0.0, 0.0, 1.0].into());
 
-        let (size_x, size_y) = canvas_size(ctx);
-        // TODO self._draw_instructions(ctx, size_x, size_y);
-
-        // TODO self.court.draw(ctx, self.scores);
+        self.court.draw(ctx, self.score);
         self.left_paddle.draw(ctx);
         self.right_paddle.draw(ctx);
         if self.playing {
@@ -218,6 +226,9 @@ impl event::EventHandler for MainState {
         } else {
             // TODO self.menu.draw (ctx);
         }
+
+        let (size_x, size_y) = canvas_size(ctx);
+        // TODO self._draw_instructions(ctx, size_x, size_y);
 
         graphics::draw(
             ctx,

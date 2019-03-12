@@ -10,6 +10,7 @@ extern crate stdweb;
 
 mod ball;
 mod constants;
+mod court;
 mod level;
 mod paddle;
 mod player;
@@ -34,6 +35,7 @@ fn main() -> GameResult {
                 PRESS1_IMAGE_FILE,
                 PRESS2_IMAGE_FILE,
                 WINNER_IMAGE_FILE,
+                BLOCK_IMAGE_FILE,
             ]),
             ..Default::default()
         },
@@ -45,24 +47,7 @@ fn main() -> GameResult {
 }
 
 // LEGACY "MAGIC"
-
-//mod game;
-//use game::{Game, Runner};
 /*
-fn main() {
-    stdweb::initialize();
-
-    stdweb::event_loop();
-}
-
-pub fn log_wip() {
-    console!(log, "PING 🏓 PONG 🏓");
-}
-
-//=============================================================================
-// PONG
-//=============================================================================
-
 struct Defaults {
     width: u32,
     height: u32,
@@ -229,23 +214,6 @@ impl Sounds {
     }
 
     pub fn wall(&self) {
-        unimplemented!()
-    }
-}
-
-//=============================================================================
-// COURT
-//=============================================================================
-
-#[derive(Clone)]
-struct Court {}
-impl Court {
-    pub fn new() -> Court {
-        //TODO punted
-        Court {}
-    }
-
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d, score: Score) {
         unimplemented!()
     }
 }

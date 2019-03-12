@@ -53,14 +53,15 @@ impl Paddle {
         rhs: bool,
     ) -> Paddle {
         let paddle_height = canvas_height * PADDLE_HEIGHT_TO_SCREEN_HEIGHT;
+        let bh = BLOCK_LENGTH_TO_SCREEN_HEIGHT * canvas_height;
         let mut paddle = Paddle {
             auto: false,
             level: None,
             width: canvas_width * PADDLE_WIDTH_TO_SCREEN_WIDTH,
             height: paddle_height,
             speed: 0.0,
-            min_y: WALL_WIDTH,
-            max_y: canvas_height - WALL_WIDTH - paddle_height,
+            min_y: bh,
+            max_y: canvas_height - bh - paddle_height,
             bottom: 0.0,
             left: 0.0,
             right: 0.0,
@@ -152,7 +153,7 @@ impl Paddle {
         }
 
         let amount: f32 = self.down - self.up;
-        //console!(log,format!("Paddle update amount: {}", amount));
+
         if amount != 0.0 {
             let mut y = self.y + amount * dt_secs * self.speed;
             if y < self.min_y {
@@ -161,7 +162,6 @@ impl Paddle {
                 y = self.max_y
             };
 
-            //console!(log,format!("Paddle set_pos: x {}, y {}", self.x, y));
             self.set_pos(self.x, y);
         }
     }

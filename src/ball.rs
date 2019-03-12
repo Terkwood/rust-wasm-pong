@@ -1,7 +1,7 @@
 use ggez::{graphics, Context};
 use rand::Rng;
 
-use crate::constants::{BALL_ACCEL, BALL_RADIUS, BALL_SPEED, WALL_WIDTH};
+use crate::constants::{BALL_ACCEL, BALL_RADIUS, BALL_SPEED, BLOCK_LENGTH_TO_SCREEN_HEIGHT};
 use crate::paddle;
 use crate::paddle::Paddle;
 use crate::player::Player;
@@ -32,12 +32,13 @@ impl Ball {
     pub fn new(image: ggez::graphics::Image, game_width: f32, game_height: f32) -> Ball {
         let max_x = game_width - BALL_RADIUS;
         let min_x = BALL_RADIUS;
+        let bh = BLOCK_LENGTH_TO_SCREEN_HEIGHT * game_height;
         let ball = Ball {
             radius: BALL_RADIUS,
             min_x,
             max_x,
-            min_y: WALL_WIDTH + BALL_RADIUS,
-            max_y: game_height - WALL_WIDTH - BALL_RADIUS,
+            min_y: bh + BALL_RADIUS,
+            max_y: game_height - bh - BALL_RADIUS,
             left: 0.0,
             right: 0.0,
             top: 0.0,
