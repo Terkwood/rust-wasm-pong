@@ -117,7 +117,7 @@ impl MainState {
         }
     }
 
-    fn alert(&self, msg: &str) -> bool {
+    fn alert(&self, _msg: &str) -> bool {
         unimplemented!()
     }
 
@@ -236,7 +236,7 @@ impl event::EventHandler for MainState {
                 "Perma-Bot Mode 🤖\n".to_string()
                     + &format!("Res {} x {}\n", size_x, size_y)
                     + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000)
-            , graphics::Font("small-caps 10px Courier New".to_string()), 1.0)
+            , graphics::Font("10px Orbitron".to_string()), 1.0)
             ),
             graphics::DrawParam::default()
                 .color(graphics::Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0})
