@@ -26,7 +26,7 @@ pub const BALL_ACCEL: f32 = 8.0;
 
 pub const WINNER_FONT: &str = "24px Orbitron";
 pub const MENU_FONT: &str = "18px Orbitron";
-pub const STATS_FONT: &str = "10px Orbitron";
+pub const _STATS_FONT: &str = "10px Orbitron";
 pub const TEXT_COLOR: Color = Color {
     r: 1.0,
     g: 1.0,

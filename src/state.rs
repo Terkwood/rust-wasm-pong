@@ -78,17 +78,13 @@ impl MainState {
         }
     }
 
-    fn stop(&mut self, ask: bool) {
-        if self.playing && (!ask || self.alert("Abandon game in progress?")) {
+    fn stop(&mut self) {
+        if self.playing {
             self.playing = false;
             self.left_paddle.set_auto(false, None);
             self.right_paddle.set_auto(false, None);
             // TODO self._show_cursor();
         }
-    }
-
-    fn alert(&self, _msg: &str) -> bool {
-        unimplemented!()
     }
 
     fn goal(&mut self, player: Player) {
@@ -97,12 +93,31 @@ impl MainState {
 
         if self.score.of(player) == 9 {
             self.menu.declare_winner(player);
-            self.stop(false);
+            self.stop();
         } else {
             self.ball.reset(Some(player));
             self.left_paddle.set_level(level(self.score, Player::One));
             self.right_paddle.set_level(level(self.score, Player::Two));
         }
+    }
+
+    fn _draw_stats_text(&self, ctx: &mut Context) {
+        let (size_x, size_y) = canvas_size(ctx);
+
+        graphics::draw(
+            ctx,
+            &ggez::graphics::Text::new((
+                format!("Res {} x {}\n", size_x, size_y)
+                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
+                graphics::Font(_STATS_FONT.to_string()),
+                1.0,
+            )),
+            graphics::DrawParam::default()
+                .color(TEXT_COLOR)
+                .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
+                .scale([1.5, 1.5]),
+        )
+        .unwrap();
     }
 
     fn _hide_cursor(&self) {
@@ -195,24 +210,6 @@ impl event::EventHandler for MainState {
         } else {
             self.menu.draw(ctx);
         }
-
-        let (size_x, size_y) = canvas_size(ctx);
-        // TODO self._draw_instructions(ctx, size_x, size_y);
-
-        graphics::draw(
-            ctx,
-            &ggez::graphics::Text::new((
-                format!("Res {} x {}\n", size_x, size_y)
-                    + &format!("Timestamp {:04}\n", self.last_frame as u64 % 10000),
-                graphics::Font(STATS_FONT.to_string()),
-                1.0,
-            )),
-            graphics::DrawParam::default()
-                .color(TEXT_COLOR)
-                .dest([size_x as f32 * 0.75, size_y as f32 * 0.85])
-                .scale([1.5, 1.5]),
-        )
-        .unwrap();
 
         graphics::present(ctx)
     }
