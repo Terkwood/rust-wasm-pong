@@ -7,6 +7,7 @@ use crate::menu::Menu;
 use crate::paddle::Paddle;
 use crate::player::Player;
 use crate::score::Score;
+use crate::sounds;
 
 pub struct MainState {
     menu: Menu,
@@ -91,7 +92,7 @@ impl MainState {
     }
 
     fn goal(&mut self, player: Player) {
-        // TODO self.sounds.goal();
+        sounds::goal();
         self.score = Score::incr(self.score, player);
 
         if self.score.of(player) == 9 {
@@ -136,14 +137,15 @@ impl event::EventHandler for MainState {
         self.left_paddle.update(dt_secs, &self.ball, game_width);
         self.right_paddle.update(dt_secs, &self.ball, game_width);
         if self.playing {
-            let _dx = self.ball.dx;
-            let _dy = self.ball.dy;
+            let dx = self.ball.dx;
             self.ball
                 .update(dt_secs, &self.left_paddle, &self.right_paddle);
-            // TODO sounds
-            /*  if (self.ball.dx < 0 && dx > 0) self.sounds.ping ();
-            else if (self. ball.dx > 0 && dx < 0) self. sounds.pong ();
-            else if (self. ball.dy * dy < 0) self. sounds.wall (); */
+
+            if self.ball.dx < 0.0 && dx > 0.0 {
+                sounds::ping();
+            } else if self.ball.dx > 0.0 && dx < 0.0 {
+                sounds::pong();
+            }
 
             let (game_width, _) = canvas_size(ctx);
             if self.ball.left > game_width {
