@@ -6,15 +6,24 @@ A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Co
 
 [Play the live demo](https://pong.prawn.farm)
 
-## How To
-
-Build static assets:
+## Building static assets 
 
 ```sh
 sh build.sh
 ```
 
-Run locally:
+Build Note that this will create a gzipped version of `rust-wasm-pong.wasm`. If you want to serve it locally, you'll need to present the file with the following headers, so that your browser can decode it. 
+
+```
+Content-Encoding: gzip
+Content-Type: application/wasm
+```
+
+```sh
+sh build.sh
+```
+
+## RRun locally:
 
 ```sh
 cargo web start --release
