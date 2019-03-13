@@ -1,7 +1,5 @@
 # Rust 🦀 WASM 🕸 Pong 🏓
 
-🚧 _This project is under construction._ 🚧
-
 A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Compiled to WebAssembly!
 
 ## Live Demo
