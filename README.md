@@ -6,28 +6,34 @@ A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Co
 
 [Play the live demo](https://pong.prawn.farm)
 
+
+## Running locally
+
+You need to have [cargo-web](https://github.com/koute/cargo-web) installed:
+
+```sh
+cargo install cargo-web
+```
+
+Then:
+
+```sh
+cargo web start --release
+```
+
 ## Building static assets 
 
 ```sh
 sh build.sh
 ```
 
-Build Note that this will create a gzipped version of `rust-wasm-pong.wasm`. If you want to serve it locally, you'll need to present the file with the following headers, so that your browser can decode it. 
+Note that this will create a gzipped version of `rust-wasm-pong.wasm`. If you want to serve it locally, you'll need to present the file with the following headers, so that your browser can decode it. 
 
 ```
 Content-Encoding: gzip
 Content-Type: application/wasm
 ```
 
-```sh
-sh build.sh
-```
-
-## RRun locally:
-
-```sh
-cargo web start --release
-```
 
 ## Inspiration
 
