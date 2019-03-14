@@ -1,6 +1,6 @@
 [package]
 name = "rust-wasm-pong"
-version = "0.2.1"
+version = "0.2.2-friendly"
 authors = ["Terkwood <metaterkhorn@gmail.com>"]
 edition = "2018"
 
