@@ -138,7 +138,7 @@ impl MainState {
     }
 
     fn show_cursor(&mut self) {
-        self.canvas.set_attribute("style", "cursor: none;").unwrap();
+        self.canvas.set_attribute("style", "cursor: auto;").unwrap();
     }
 }
 
@@ -190,7 +190,7 @@ impl event::EventHandler for MainState {
 
     fn key_down_event(&mut self, _ctx: &mut Context, key: &str) {
         match key {
-            "Escape" => console!(log, "ESC"),
+            "Escape" => self.stop(),
             "Digit0" => self.start_bots(),
             "Digit1" => self.start_single_player(),
             "Digit2" => self.start_double_player(),

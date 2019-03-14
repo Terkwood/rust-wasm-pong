@@ -9,6 +9,7 @@ const ONE_PLAYER_CONTROLS_MSG: &str = "'q': move up\n\n'a': move down";
 const TWO_PLAYER_START_MSG: &str = "press '2' for\n\ndouble player";
 const TWO_PLAYER_CONTROLS_MSG: &str = "'p': move up\n\n'l': move down";
 const ZERO_PLAYER_START_MSG: &str = "press '0' for\n\nbots-only 🤖";
+const ADDITIONAL_INSTRUCTIONS_MSG: &str = "'ESC': quit";
 
 #[derive(Clone)]
 pub struct Menu {
@@ -74,9 +75,9 @@ impl Menu {
                 msg: ZERO_PLAYER_START_MSG.to_string(),
             },
             additional_instructions: TextBox {
-                x: 0.0,
-                y: 0.0,
-                msg: "".to_string(),
+                x: p2_start_x,
+                y: bottom_start_y,
+                msg: ADDITIONAL_INSTRUCTIONS_MSG.to_string(),
             },
             winner: None,
         }
@@ -102,6 +103,7 @@ impl Menu {
             &self.two_player_start,
             &self.two_player_controls,
             &self.zero_player_start,
+            &self.additional_instructions,
         ]
     }
 
