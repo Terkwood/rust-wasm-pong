@@ -19,6 +19,8 @@ pub struct Paddle {
     pub right: f32,
     pub x: f32,
     pub y: f32,
+    start_x: f32,
+    start_y: f32,
     pub down: f32,
     pub up: f32,
     pub image: ggez::graphics::Image,
@@ -54,37 +56,43 @@ impl Paddle {
     ) -> Paddle {
         let paddle_height = canvas_height * PADDLE_HEIGHT_TO_SCREEN_HEIGHT;
         let bh = BLOCK_LENGTH_TO_SCREEN_HEIGHT * canvas_height;
+        let width = canvas_width * PADDLE_WIDTH_TO_SCREEN_WIDTH;
+        let start_x = if rhs { canvas_width - width } else { 0.0 };
+        let min_y = bh;
+        let max_y = canvas_height - bh - paddle_height;
+        let start_y = min_y + (max_y - min_y) / 2.0;
+        let speed = (max_y - min_y) / PADDLE_SPEED;
+
         let mut paddle = Paddle {
             auto: false,
             level: None,
-            width: canvas_width * PADDLE_WIDTH_TO_SCREEN_WIDTH,
+            width,
             height: paddle_height,
-            speed: 0.0,
-            min_y: bh,
-            max_y: canvas_height - bh - paddle_height,
+            speed,
+            min_y,
+            max_y,
             bottom: 0.0,
             left: 0.0,
             right: 0.0,
             top: 0.0,
             x: 0.0,
             y: 0.0,
+            start_x,
+            start_y,
             up: 0.0,
             down: 0.0,
             image,
             prediction: None,
         };
-        paddle.speed = (paddle.max_y - paddle.min_y) / PADDLE_SPEED;
-        paddle.set_pos(
-            if rhs {
-                canvas_width - paddle.width
-            } else {
-                0.0
-            },
-            paddle.min_y + (paddle.max_y - paddle.min_y) / 2.0,
-        );
+
+        paddle.reset_pos();
 
         paddle.set_dir(0.0);
         paddle
+    }
+
+    fn reset_pos(&mut self) {
+        self.set_pos(self.start_x, self.start_y);
     }
 
     fn set_dir(&mut self, dy: f32) {
@@ -121,6 +129,13 @@ impl Paddle {
 
     pub fn move_up(&mut self) {
         self.up = 1.0;
+    }
+
+    pub fn stop(&mut self) {
+        self.set_auto(false, None);
+        self.stop_moving_down();
+        self.stop_moving_up();
+        self.reset_pos();
     }
 
     pub fn set_auto(&mut self, on: bool, level: Option<u32>) {

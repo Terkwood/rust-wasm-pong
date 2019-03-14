@@ -94,8 +94,9 @@ impl MainState {
     fn stop(&mut self) {
         if self.playing {
             self.playing = false;
-            self.left_paddle.set_auto(false, None);
-            self.right_paddle.set_auto(false, None);
+            self.score = Score::new();
+            self.left_paddle.stop();
+            self.right_paddle.stop();
             self.show_cursor();
         }
     }
