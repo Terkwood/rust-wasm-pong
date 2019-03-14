@@ -1,5 +1,10 @@
 use ggez::{event, graphics, Context, GameResult};
 
+use stdweb::traits::*;
+use stdweb::unstable::TryInto;
+use stdweb::web::document;
+use stdweb::web::html_element::CanvasElement;
+
 use crate::ball::Ball;
 use crate::constants::*;
 use crate::court::Court;
@@ -18,11 +23,18 @@ pub struct MainState {
     court: Court,
     last_frame: f64,
     playing: bool,
+    canvas: CanvasElement,
 }
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         let (size_x, size_y) = canvas_size(ctx);
+        let canvas: CanvasElement = document()
+            .get_element_by_id("canvas")
+            .unwrap()
+            .try_into()
+            .unwrap();
+
         MainState {
             menu: Menu::new(size_x, size_y),
             score: Score::new(),
@@ -50,6 +62,7 @@ impl MainState {
             ),
             playing: false,
             last_frame: timestamp(),
+            canvas,
         }
     }
 
@@ -74,7 +87,7 @@ impl MainState {
             self.right_paddle
                 .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
             self.ball.reset(None);
-            // TODO self._hide_cursor();
+            self.hide_cursor();
         }
     }
 
@@ -83,7 +96,7 @@ impl MainState {
             self.playing = false;
             self.left_paddle.set_auto(false, None);
             self.right_paddle.set_auto(false, None);
-            // TODO self._show_cursor();
+            self.show_cursor();
         }
     }
 
@@ -120,12 +133,12 @@ impl MainState {
         .unwrap();
     }
 
-    fn _hide_cursor(&self) {
-        unimplemented!()
+    fn hide_cursor(&self) {
+        self.canvas.set_attribute("style", "cursor: none;").unwrap();
     }
 
-    fn _show_cursor(&self) {
-        unimplemented!()
+    fn show_cursor(&mut self) {
+        self.canvas.set_attribute("style", "cursor: none;").unwrap();
     }
 }
 
