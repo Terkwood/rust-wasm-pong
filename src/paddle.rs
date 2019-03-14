@@ -91,7 +91,7 @@ impl Paddle {
         paddle
     }
 
-    fn reset_pos(&mut self) {
+    pub fn reset_pos(&mut self) {
         self.set_pos(self.start_x, self.start_y);
     }
 
@@ -135,7 +135,6 @@ impl Paddle {
         self.set_auto(false, None);
         self.stop_moving_down();
         self.stop_moving_up();
-        self.reset_pos();
     }
 
     pub fn set_auto(&mut self, on: bool, level: Option<u32>) {

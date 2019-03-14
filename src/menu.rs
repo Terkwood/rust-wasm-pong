@@ -96,6 +96,10 @@ impl Menu {
         }
     }
 
+    pub fn reset (&mut self) {
+        self.winner = None;
+    }
+
     fn menu_boxes(&self) -> Vec<&TextBox> {
         vec![
             &self.one_player_start,

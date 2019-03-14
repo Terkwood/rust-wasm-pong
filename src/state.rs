@@ -14,6 +14,8 @@ use crate::player::Player;
 use crate::score::Score;
 use crate::sounds;
 
+const WINNING_SCORE: u8 = 9;
+
 pub struct MainState {
     menu: Menu,
     score: Score,
@@ -80,12 +82,15 @@ impl MainState {
 
     fn start(&mut self, num_players: u32) {
         if !self.playing {
+            self.menu.reset();
             self.score = Score::new();
             self.playing = true;
             self.left_paddle
                 .set_auto(num_players < 1, Some(level(self.score, Player::One)));
+            self.left_paddle.reset_pos();
             self.right_paddle
                 .set_auto(num_players < 2, Some(level(self.score, Player::Two)));
+            self.right_paddle.reset_pos();
             self.ball.reset(None);
             self.hide_cursor();
         }
@@ -94,7 +99,6 @@ impl MainState {
     fn stop(&mut self) {
         if self.playing {
             self.playing = false;
-            self.score = Score::new();
             self.left_paddle.stop();
             self.right_paddle.stop();
             self.show_cursor();
@@ -105,7 +109,7 @@ impl MainState {
         sounds::goal();
         self.score = Score::incr(self.score, player);
 
-        if self.score.of(player) == 9 {
+        if self.score.of(player) == WINNING_SCORE {
             self.menu.declare_winner(player);
             self.stop();
         } else {

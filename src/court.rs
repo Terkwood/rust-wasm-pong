@@ -100,7 +100,7 @@ impl Court {
         self.draw_digit(ctx, score.1, self.score_boxes.1);
     }
 
-    fn draw_digit(&self, ctx: &mut Context, n: u32, block: DrawnBlock) {
+    fn draw_digit(&self, ctx: &mut Context, n: u8, block: DrawnBlock) {
         let mut dr = |x: f32, y: f32, sx: f32, sy: f32| {
             let _ = graphics::draw(
                 ctx,
