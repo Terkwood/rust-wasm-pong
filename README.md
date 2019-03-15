@@ -1,11 +1,12 @@
 # Rust 🦀 WASM 🕸 Pong 🏓
 
-A port of [javascript pong](https://codeincomplete.com/games/pong/) to rust.  Compiled to WebAssembly!
+A port of [codeincomplete's javascript pong](https://codeincomplete.com/games/pong/) written in rust and compiled to WebAssembly.
+
+![screenshot](screenshot.png)
 
 ## Live Demo
 
-[Play the live demo](https://pong.prawn.farm)
-
+[Play the live demo here!](https://pong.prawn.farm)
 
 ## Running locally
 
@@ -31,13 +32,12 @@ Then:
 sh build.sh
 ```
 
-Note that this will create a gzipped version of `rust-wasm-pong.wasm`. If you want to serve it locally, you'll need to present the file with the following headers, so that your browser can decode it. 
+Note that this will create a gzipped version of `rust-wasm-pong.wasm`. If you want to serve it locally, you'll need to present the file with the following headers, so that your browser can decode it.
 
-```
+```text
 Content-Encoding: gzip
 Content-Type: application/wasm
 ```
-
 
 ## Inspiration
 
