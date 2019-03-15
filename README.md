@@ -23,6 +23,10 @@ cargo web start --release
 
 ## Building static assets 
 
+You must first install `wasm-opt`.  [See the instructions in the binaryen package for help](https://github.com/WebAssembly/binaryen#building).  `wasm-opt` needs to be visible in your path.
+
+Then:
+
 ```sh
 sh build.sh
 ```
